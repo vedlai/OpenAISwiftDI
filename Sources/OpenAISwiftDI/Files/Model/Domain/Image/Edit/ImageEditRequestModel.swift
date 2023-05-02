@@ -4,7 +4,7 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import UIKit
 //https://platform.openai.com/docs/api-reference/images/create-edit
 public struct ImageEditRequestModel: Sendable{
@@ -68,3 +68,4 @@ public struct ImageEditRequestModel: Sendable{
         }
     }
 }
+#endif

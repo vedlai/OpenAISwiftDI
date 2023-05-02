@@ -1,24 +1,22 @@
 //
-//  URLSessionOpenAIProvider+Completions.swift
+//  File.swift
 //  
 //
-//  Created by vedlai on 4/30/23.
+//  Created by vedlai on 5/1/23.
 //
 
 import Foundation
 extension URLSessionOpenAIProvider{
-    //MARK: Completions
-    public func makeCompletionsCall(parameters: CompletionsRequest) async throws -> CompletionsResponse {
+    //MARK: Chat Completions
+    public func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse {
         var parameters = parameters
         
         parameters.stream = false
         
         return try await makeCall(parameters, endpoint: .chatCompletions)
-
     }
     
-    
-    public func makeCompletionsCallStream(parameters: CompletionsRequest) -> AsyncThrowingStream<CompletionsResponse, Error> {
+    public func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) -> AsyncThrowingStream<ChatCompletionsResponse, Error> {
         return AsyncThrowingStream { continuation in
             let task = Task {
                 do{
@@ -27,7 +25,7 @@ extension URLSessionOpenAIProvider{
                     parameters.stream = true
                     
                     var c = urlComponents
-                    c.path.append(OpenAIEndpoints.completions.rawValue)
+                    c.path.append(OpenAIEndpoints.chatCompletions.rawValue)
                     
                     let url = c.url!
                     
@@ -54,13 +52,14 @@ extension URLSessionOpenAIProvider{
                         for try await byte in bytes.lines {
                             let line = byte.replacingOccurrences(of: "data: ", with: "").replacingOccurrences(of: "[DONE]", with: "")
                             if !line.isEmpty, let data = line.data(using: .utf8){
-                                let obj : CompletionsResponse = try decode(data: data)
+                                let obj : ChatCompletionsResponse = try decode(data: data)
+                                
                                 continuation.yield(obj)
                                 
                             }
                         }
                         continuation.finish()
-
+             
                 }catch{
                     continuation.finish(throwing: error)
                 }

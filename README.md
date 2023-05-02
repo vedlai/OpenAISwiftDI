@@ -8,6 +8,8 @@ OpenAISwiftDI is a Swift is a community maintained package to communicate with [
 
 The `Package` includes a `URLSession` based `Provider` that serves as a starting point but is not intended for Production environments.
 
+The package's `Request` models all have a `validate()` that is capable of doing basic checks of the models before sending them to the provider.
+
 **Setup**
 Add the dependency.
 
@@ -20,7 +22,7 @@ Import the package.
 import OpenAIDI
 ```
 
-Inject a provider.
+Inject a provider as soon as possible.          
 
 ```swift
 let key: String = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]!
@@ -29,7 +31,7 @@ let org: String = ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION"]
 
 InjectedValues[\.openAIProvider] = URLSessionOpenAIProvider(apiKey: key, orgId: org)
 ```
-Then access the managers using the `@Injected` property wrapper.
+Then access the provider using the `@Injected` property wrapper.
 
 ```swift
 @Injected(\.openAIProvider) var openAIProvider
@@ -43,9 +45,42 @@ or access one of the Manager's with built in checks such as verifiying propertie
 @Injected(\.openAICompletionsMgr) var openAICompletionsMgr
 ```
 
+**Available Sample Views**
+```swift
+ChatCompletionsSampleView()
+
+CompletionsSampleView()
+
+ImageCreateSampleView()
+
+ImageEditWithMaskSampleView()
+
+ImageVariationSampleView()
+```
+
+**Supported Endpoints**
+```swift
+public enum OpenAIEndpoints: String{
+    case completions = "/v1/completions"
+    case imagesGenerations = "/v1/images/generations"
+    case imagesEdits = "/v1/images/edits"
+    case imagesVariations = "/v1/images/variations"
+    case moderations = "/v1/moderations"
+    case chatCompletions = "/v1/chat/completions"
+}
+```
+More to come...
+
 **Contribute**
 
-Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, feature suggestions, or bug reports, please send them to [Issues]().
+Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues]().
+
+**Known Limitations**
+Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. Might adjust in the future.
+
+When using `URLSessionOpenAIProvider`, Completions and Chat Completions streams are limited to iOS 15+ and macOS 12+.
+
+Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task`, their purpose is to be quick prototypes that demostrate functionality.
 
 **License**
 

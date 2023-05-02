@@ -4,11 +4,16 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import UIKit
 
 // MARK: - OAIImageDataModel
 public struct OAIImageDataModel: OAIImageDataProtocol {
+    public init(image: UIImage?) {
+        self.image = image
+        self.url = nil
+    }
+    
     public var mask: UIImage?
     public var image: UIImage?
     
@@ -28,9 +33,7 @@ public struct OAIImageDataModel: OAIImageDataProtocol {
     public func save() throws {
         fatalError("not yet implemented")
     }
-    public static func sample() -> OAIImageDataModel{
-        .init(image: UIImage(systemName: "person")!, url: [URL(string: "https://www.google.com")!].randomElement()!)
-    }
+
 }
 
 public protocol OAIImageDataProtocol: Codable, Equatable, Hashable, Sendable{
@@ -39,6 +42,7 @@ public protocol OAIImageDataProtocol: Codable, Equatable, Hashable, Sendable{
     var image: UIImage? {get set}
     var mask: UIImage? {get set}
     
+    init(image: UIImage?)
     func save() async throws
     mutating func downloadImage() async throws
 }
@@ -53,21 +57,28 @@ extension OAIImageDataProtocol{
 
 }
 
-public protocol OAIImageProtocol: Codable, ObservableObject, Equatable, Hashable, AnyObject, Sendable {
-    associatedtype S : OAIImageProtocol
+public protocol OAIImageProtocol: Codable, Equatable, Hashable, Sendable {
     associatedtype D : OAIImageDataProtocol
     var created: Date? {get}
     var data: [D] { get set}
     var prompt: String? {get set}
+    var childType: ChildType?  {get set}
+    
+    init(data: [D])
+    func save() async throws
+
+}
+
+public protocol OAIImageReferenceProtocol: OAIImageProtocol, ObservableObject, AnyObject {
+    associatedtype S : OAIImageReferenceProtocol
     var parent: S? {get set}
     var children: [S] {get set}
-    var childType: ChildType?  {get set}
 
-    func save() async throws
 }
-public enum ChildType: String, Sendable{
+public enum ChildType: String, Sendable, Codable{
     case variation
     case edit
     case top
 }
 
+#endif

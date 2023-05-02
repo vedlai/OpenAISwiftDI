@@ -4,7 +4,7 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import SwiftUI
 
 public actor OpenAIImageManager: InjectionKey{
@@ -12,17 +12,19 @@ public actor OpenAIImageManager: InjectionKey{
     
     @Injected(\.openAIProvider) var service
     //MARK: Moderation
+    ///Throws error if the `string` was flagged.
+    ///https://platform.openai.com/docs/api-reference/moderations
     func checkModeration(string: String, model: ModerationModels = .textModerationLatest) async throws -> ModerationResponseModel{
         var object = try await service.checkModeration(input: string, model: model)
         
         object.prompt = string
-
+        
         return try object.check()
     }
-
+    
     //MARK: Creation
+    ///https://platform.openai.com/docs/api-reference/images/create
     public func generateImage<O>(request: ImageCreateRequestModel) async throws -> O  where O : OAIImageProtocol{
-        print("\(type(of: self)) :: \(#function)")
         let stream = generateImage(request: request, type: O.self)
         var image: O? = nil
         for try await step in stream {
@@ -40,13 +42,13 @@ public actor OpenAIImageManager: InjectionKey{
         }
     }
     
+    ///https://platform.openai.com/docs/api-reference/images/create
     public func generateImage<O>(request: ImageCreateRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
-        print("\(type(of: self)) :: \(#function)")
         return .init { continuation in
             let task = Task.detached { [weak self] in
                 do{
                     continuation.yield(.progress(.validating))
-
+                    
                     try request.validate()
                     guard let self = self else{
                         throw ServiceError.unknownError
@@ -57,12 +59,12 @@ public actor OpenAIImageManager: InjectionKey{
                     
                     continuation.yield(.progress(.requestingImage))
                     
-                    let object: O = try await self.service.generateImage(request: request)
+                    var object: O = try await self.service.generateImage(request: request)
                     object.prompt = request.prompt
                     object.childType = .top
                     
                     continuation.yield(.progress(.downloadImage))
-
+                    
                     for (idx, data) in object.data.enumerated() {
                         if let url = data.url{
                             object.data[idx].image = try await Self.downloadImage(url: url)
@@ -84,7 +86,7 @@ public actor OpenAIImageManager: InjectionKey{
         }
     }
     
-
+    
     public enum Steps<O: OAIImageProtocol & Sendable>: Sendable{
         case image(image: O)
         case progress(ServiceProgress)
@@ -136,7 +138,7 @@ public actor OpenAIImageManager: InjectionKey{
 }
 extension OpenAIImageManager{
     //MARK: Edit API Methods
-    
+    ///https://platform.openai.com/docs/api-reference/images/create-edit
     public func generateImageEdit<O>(request: ImageEditRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
         
         return AsyncThrowingStream { continuation in
@@ -153,9 +155,9 @@ extension OpenAIImageManager{
                     let _ = try await self.checkModeration(string: request.prompt)
                     
                     continuation.yield(.progress(.requestingImage))
-                
                     
-                    let object: O
+                    
+                    var object: O
                     
                     if request.mask == nil{
                         object = try await self.service.generateImageEdit(request: request)
@@ -166,7 +168,7 @@ extension OpenAIImageManager{
                     object.childType = .edit
                     
                     continuation.yield(.progress(.downloadImage))
-
+                    
                     for (idx, data) in object.data.enumerated() {
                         if let url = data.url{
                             object.data[idx].image = try await Self.downloadImage(url: url)
@@ -187,24 +189,30 @@ extension OpenAIImageManager{
         }
     }
     //MARK: Variation
+    ///https://platform.openai.com/docs/api-reference/images/create-variation
     public func generateImageVariation<O>(request: ImageVariationRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
         
         return .init { continuation in
             let task = Task.detached { [weak self] in
                 do{
+                    continuation.yield(.progress(.validating))
+                    
                     try request.validate()
                     
                     guard let self = self else{
                         throw ServiceError.unknownError
                     }
-
-                    let object: O = try await self.service.generateImageVariation(request: request)
+                    
+                    continuation.yield(.progress(.requestingImage))
+                    
+                    
+                    var object: O = try await self.service.generateImageVariation(request: request)
                     
                     object.prompt = "variation"
                     object.childType = .variation
                     
                     continuation.yield(.progress(.downloadImage))
-
+                    
                     for (idx, data) in object.data.enumerated() {
                         if let url = data.url{
                             object.data[idx].image = try await Self.downloadImage(url: url)
@@ -225,69 +233,9 @@ extension OpenAIImageManager{
     }
 }
 extension OpenAIImageManager{
-    //MARK: Helpers
     public static func downloadImage(url: URL) async throws -> UIImage{
-        let (data, response) = try await URLSession.shared.data(from: url)
         
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw ServiceError.invalidResponseType
-        }
-        guard httpResponse.statusCode == 200 else{
-            throw URLError(URLError.Code(rawValue: httpResponse.statusCode))
-        }
-        guard let image = UIImage(data: data) else{
-            throw ServiceError.unableToGetImageFromURL
-        }
-        return image
+        return try await url.downloadImage()
     }
-    
-    
-
 }
-
-    extension URL {
-        public func downloadImage() async throws -> UIImage{
-            let (data, response) = try await URLSession.shared.data(from: self)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw ServiceError.invalidResponseType
-            }
-            guard httpResponse.statusCode == 200 else{
-                throw URLError(URLError.Code(rawValue: httpResponse.statusCode))
-            }
-            guard let image = UIImage(data: data) else{
-                throw ServiceError.unableToGetImageFromURL
-            }
-            return image
-        }
-        
-        public func downloadImage(completion: @escaping (Result<UIImage, Error>) -> Void)  {
-            let task = URLSession.shared.dataTask(with: URLRequest(url: self), completionHandler: { data, response, error in
-                if let error = error {
-                    completion(.failure(error))
-                }else{
-                    do{
-                        guard let httpResponse = response as? HTTPURLResponse else {
-                            throw ServiceError.invalidResponseType
-                        }
-                        guard httpResponse.statusCode == 200 else{
-                            throw URLError(URLError.Code(rawValue: httpResponse.statusCode))
-                        }
-                        guard let data = data, let image = UIImage(data: data) else{
-                            throw ServiceError.unableToGetImageFromURL
-                        }
-                        completion(.success(image))
-                    }catch{
-                        completion(.failure(error))
-                    }
-                }
-            })
-            task.resume()
-        }
-        
-        public enum ServiceError: LocalizedError, Sendable{
-            case unableToGetImageFromURL
-            case invalidResponseType
-        }
-        
-    }
+#endif

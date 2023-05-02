@@ -4,21 +4,13 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import Foundation
 extension URLSessionOpenAIProvider{
     //MARK: Image Generation
     public func generateImage<O>(request: ImageCreateRequestModel) async throws -> O where O : OAIImageProtocol {
         
-        var c = urlComponents
-        c.path.append(OpenAIEndpoints.imagesGenerations.rawValue)
-        
-        let url = c.url!
-
-        var urlRequest = getBasicRequest(url: url)
-        urlRequest.httpBody = try encode(model: request)
-        
-        return try await makeCall(request: urlRequest)
+        return try await makeCall(request, endpoint: .imagesGenerations)
     }
     
     public func generateImageEditWMask<O>(request: ImageEditRequestModel) async throws -> O where O : OAIImageProtocol {
@@ -59,7 +51,6 @@ extension URLSessionOpenAIProvider{
     }
     
     public func generateImageEdit<O>(request: ImageEditRequestModel) async throws -> O where O : OAIImageProtocol {
-        
         
         guard request.mask == nil else {
             throw PackageErrors.custom("Use generateImageEditWMask")
@@ -127,4 +118,4 @@ extension URLSessionOpenAIProvider{
         return try await makeCall(request: request)
     }
 }
-
+#endif

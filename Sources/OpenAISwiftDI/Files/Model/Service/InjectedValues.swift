@@ -7,15 +7,18 @@
 
 import Foundation
 extension InjectedValues {
-    public typealias ImageManager = OpenAIImageManager
     public var openAIProvider: OpenAIProviderProtocol {
         get { Self[OpenAIProviderKey.self] }
         set { Self[OpenAIProviderKey.self] = newValue }
     }
+    #if canImport(UIKit)
+    public typealias ImageManager = OpenAIImageManager
+
     public var openAIImageMgr: ImageManager {
         get { Self[ImageManager.self] }
         set { Self[ImageManager.self] = newValue }
     }
+    #endif
     public var openAICompletionsMgr: OpenAICompletionsManager {
         get { Self[OpenAICompletionsManager.self] }
         set { Self[OpenAICompletionsManager.self] = newValue }

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+///`URLSession` based provider to be used as a starting point,
+///not intended for production since it requires that the API key be included Client-Side
 public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
     ///Contains the scheme and host for OpenAPI
     let urlComponents: URLComponents = {
@@ -29,7 +31,6 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
     
     //MARK: Moderation
     public func checkModeration(input: String, model: ModerationModels = .textModerationLatest) async throws -> ModerationResponseModel {
-        print("\(type(of: self)) :: \(#function)")
         var c = urlComponents
         c.path.append(OpenAIEndpoints.moderations.rawValue)
         
@@ -58,7 +59,6 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
     ///                         httpMethod = "POST"
     ///
     internal func getBasicRequest(url: URL) -> URLRequest{
-        print("\(type(of: self)) :: \(#function)")
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
@@ -87,6 +87,8 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
         guard httpResponse.statusCode == 200 else{
             if let openAIError: OpenAIErrorResponse = try? decode(data: data) {
                 throw openAIError.error
+            } else if let error: OpenAIError = try? decode(data: data){
+                throw error
             }else{
                 if let string = String(data: data, encoding: .utf8) as? AnyObject{
                     print("🛑 \(type(of: self)) :: \n\tERROR: \(string)")
@@ -96,23 +98,44 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
         }
     }
 
+    internal func makeCall<D, E>(_ obj: E, endpoint: OpenAIEndpoints) async throws -> D where D: Decodable, E: Encodable{
+        var c = urlComponents
+        c.path.append(endpoint.rawValue)
+        
+        let url = c.url!
+        
+        var request = getBasicRequest(url: url)
+        
+        let encoder = JSONEncoder()
+        
+        let json = try encoder.encode(obj)
+        
+        request.httpBody = json
+        
+        return try await makeCall(request: request)
+    }
     internal func makeCall<D>(request: URLRequest) async throws -> D where D: Decodable{
-        print("\(type(of: self)) :: \(#function)")
         let data = try await makeCall(request: request)
         let obj: D = try decode(data: data)
         return obj
     }
     
     internal func decode<D>(data: Data) throws -> D where D: Decodable{
-        print("\(type(of: self)) :: \(#function)")
         let decoder = self.decoder
         
         if let error = try? decoder.decode(OpenAIErrorResponse.self, from: data){
             throw error.error
         }
+        do{
+            let obj = try decoder.decode(D.self, from: data)
+            return obj
+        }catch{
+            if let string = String(data: data, encoding: .utf8) as? AnyObject{
+                print("🛑 \(type(of: self)) :: \n\tERROR: \(string)")
+            }
+            throw error
+        }
         
-        let obj = try decoder.decode(D.self, from: data)
-        return obj
     }
     internal func encode<E: Encodable>(model: E) throws -> Data{
         let encoder: JSONEncoder = .init()

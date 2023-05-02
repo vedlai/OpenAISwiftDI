@@ -24,4 +24,14 @@ public enum ImageSize: String, CaseIterable, Sendable, Codable, CustomStringConv
             return "large"
         }
     }
+    public var size: CGFloat{
+        switch self{
+        case .small:
+            return 256
+        case .medium:
+            return 512
+        case .large:
+            return 1024
+        }
+    }
 }

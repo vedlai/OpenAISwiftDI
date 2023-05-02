@@ -4,7 +4,7 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import Foundation
 ///https://platform.openai.com/docs/api-reference/images/create
 public struct ImageCreateRequestModel: Codable, Sendable{
@@ -30,5 +30,6 @@ public struct ImageCreateRequestModel: Codable, Sendable{
             throw PackageErrors.custom("n must be between 1 and 10.")
         }
     }
-    
+
 }
+#endif

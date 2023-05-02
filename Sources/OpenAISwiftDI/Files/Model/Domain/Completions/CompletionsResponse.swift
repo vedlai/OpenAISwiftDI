@@ -8,6 +8,7 @@
 import Foundation
 
 // MARK: - CompletionsResponse
+///https://platform.openai.com/docs/api-reference/completions
 public struct CompletionsResponse: Codable, Equatable, Hashable, Identifiable, Sendable {
     public let id: String
     public var object: String
@@ -59,7 +60,7 @@ public struct Choice: Codable, Equatable, Hashable, Identifiable, Sendable {
     public var text: String
 
     public let index: Int
-    public let finishReason: String
+    public let finishReason: String?
     public let logprobs: String?
 
     enum CodingKeys: String, CodingKey {
@@ -76,6 +77,17 @@ public struct Usage: Codable, Equatable, Hashable, Sendable {
         case totalTokens = "total_tokens"
         case completionTokens = "completion_tokens"
         case promptTokens = "prompt_tokens"
+    }
+    
+    static func + (lhs: Usage, rhs: Usage) -> Usage{
+        Usage(totalTokens: lhs.totalTokens + rhs.totalTokens, completionTokens: lhs.completionTokens + rhs.completionTokens, promptTokens: lhs.promptTokens + rhs.promptTokens)
+    }
+}
+extension Optional<Usage>{
+    static func + (lhs: Usage?, rhs: Usage?) -> Usage{
+        let lhs = lhs ?? .init(totalTokens: 0, completionTokens: 0, promptTokens: 0)
+        let rhs = rhs ?? .init(totalTokens: 0, completionTokens: 0, promptTokens: 0)
+        return lhs + rhs
     }
 }
 

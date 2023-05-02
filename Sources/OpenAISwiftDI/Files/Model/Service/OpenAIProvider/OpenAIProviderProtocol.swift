@@ -6,20 +6,13 @@
 //
 
 import SwiftUI
-
+///Serves as the interface between iOS and  OpenAI
 public protocol OpenAIProviderProtocol {
-    ///Classifies if text violates OpenAI's Content Policy
-    /// - Parameters
-    ///    - input : string or array - The input text to classify
-    ///    - model :  string - Defaults to text-moderation-latest
-    /// - Discussion
-    /// Two content moderations models are available: text-moderation-stable and text-moderation-latest.
-    /// The default is text-moderation-latest which will be automatically upgraded over time. This ensures you are always using our most accurate model. If you use text-moderation-stable, we will provide advanced notice before updating the model. Accuracy of text-moderation-stable may be slightly lower than for text-moderation-latest.
-    ///
+    /// Classifies if text violates OpenAI's Content Policy
+    /// Throws error if the `string` was flagged.
     func checkModeration(input: String, model: ModerationModels) async throws -> ModerationResponseModel
-    
-    
-    //MARK: Image
+    #if canImport(UIKit)
+    // MARK: Image
     /// Creates an image given a prompt.
     func generateImage<O>(request: ImageCreateRequestModel) async throws -> O where O: OAIImageProtocol
     /// Creates an edited or extended image given an original image and a prompt.
@@ -28,14 +21,21 @@ public protocol OpenAIProviderProtocol {
     func generateImageEdit<O>(request: ImageEditRequestModel) async throws -> O where O : OAIImageProtocol
     /// Creates a variation of a given image.
     func generateImageVariation<O>(request: ImageVariationRequestModel) async throws -> O where O : OAIImageProtocol
-    
+    #endif
     
     //MARK: Completions
+    // Creates a completion for the provided prompt and parameters.
     func makeCompletionsCallStream(parameters: CompletionsRequest) async ->  AsyncThrowingStream<CompletionsResponse, Error>
+    // Creates a completion for the provided prompt and parameters.
     func makeCompletionsCall(parameters: CompletionsRequest) async throws -> CompletionsResponse
-
+    
+    //MARK: Chat Completions
+    // Given a list of messages describing a conversation, the model will return a response.
+    func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse
+    // Given a list of messages describing a conversation, the model will return a response.
+    func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) -> AsyncThrowingStream<ChatCompletionsResponse, Error>
 }
 
 public struct OpenAIProviderKey: InjectionKey {
-    public static var currentValue: OpenAIProviderProtocol = MockOpenAIService()
+    public static var currentValue: OpenAIProviderProtocol = MockOpenAIProvider()
 }

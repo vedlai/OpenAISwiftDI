@@ -4,7 +4,7 @@
 //
 //  Created by vedlai on 4/30/23.
 //
-
+#if canImport(UIKit)
 import Foundation
 import UIKit
 //https://platform.openai.com/docs/api-reference/images/create-variation
@@ -43,3 +43,4 @@ public struct ImageVariationRequestModel: Sendable{
         }
     }
 }
+#endif

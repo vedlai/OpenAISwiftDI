@@ -18,7 +18,7 @@ public struct ModerationResponseModel: Codable, Sendable {
             let fs = self.results.map { res in
                 res.categories.flaggedDescription
             }.joined(separator: ", ")
-            throw ModerationError.flag("\"\(prompt ?? "Prompt")\" was flagged as \(fs). Rephrase your prompt!")
+            throw ModerationError.flag("\(prompt?.capitalized ?? "Prompt") was flagged as \(fs). Rephrase your prompt!")
         }
         return self
     }

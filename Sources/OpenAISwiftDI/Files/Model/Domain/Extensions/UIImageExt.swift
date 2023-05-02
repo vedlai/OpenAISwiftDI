@@ -7,12 +7,14 @@
 #if canImport(UIKit)
 import UIKit
 extension UIImage {
+    ///Checks if image has alpha information
     public var hasAlpha: Bool {
         guard let alphaInfo = self.cgImage?.alphaInfo else {return false}
         return alphaInfo != CGImageAlphaInfo.none &&
         alphaInfo != CGImageAlphaInfo.noneSkipFirst &&
         alphaInfo != CGImageAlphaInfo.noneSkipLast
     }
+    ///Returns an image with the provided alpha value.
     public func imageWithAlpha(alpha: CGFloat) throws -> UIImage {
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         draw(at: CGPointZero, blendMode: .normal, alpha: alpha)
@@ -23,7 +25,7 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return newImage
     }
-    enum ImageError: LocalizedError{
+    fileprivate enum ImageError: LocalizedError{
         case unableToAddAplhaToImage
         case dataIsMissingOrInavalid
         case noDataAvailable
@@ -33,7 +35,6 @@ extension UIImage {
 
 
 extension UIImage {
-    
     public func resizeWith(percentage: CGFloat) -> UIImage? {
         let imageView = UIImageView(frame: CGRect(origin: .zero, size: CGSize(width: size.width * percentage, height: size.height * percentage)))
         imageView.contentMode = .scaleAspectFit
@@ -60,7 +61,8 @@ extension UIImage {
 
 //https://stackoverflow.com/questions/31661023/change-color-of-certain-pixels-in-a-uiimage
 extension UIImage{
-    public func processPixels(location: CGPoint?, color: UIImage.RGBA32 = .clear) -> UIImage? {
+    ///Replaces the pixels at the given location with a height and width of the provided `size`. Square
+    public func processPixels(location: CGPoint?, color: UIImage.RGBA32 = .clear, size: Int = 20) -> UIImage? {
         guard let inputCGImage = self.cgImage else {
             print("unable to get cgImage")
             return nil
@@ -86,8 +88,8 @@ extension UIImage{
         
         let pixelBuffer = buffer.bindMemory(to: RGBA32.self, capacity: width * height)
         if let location = location{
-            let desiredSize = 20
-            let size = desiredSize/2 //half on the left and half on the right and top/bottom.
+            
+            let size = size/2 //half on the left and half on the right and top/bottom.
             let y = Int(location.x)
             let x = Int(location.y)
             let xMin = x - size
