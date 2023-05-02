@@ -14,7 +14,7 @@ The package's `Request` models all have a `validate()` that is capable of doing 
 Add the dependency.
 
 ```swift
-.package(url: "https://", from: "1.0.0")
+.package(url: "https://github.com/vedlai/OpenAISwiftDI", from: "1.0.0")
 ```
 **Getting Started**
 Import the package.
@@ -73,9 +73,10 @@ More to come...
 
 **Contribute**
 
-Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues]().
+Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues](https://github.com/vedlai/OpenAISwiftDI/issues).
 
 **Known Limitations**
+
 Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. Might adjust in the future.
 
 When using `URLSessionOpenAIProvider`, Completions and Chat Completions streams are limited to iOS 15+ and macOS 12+.
