@@ -75,7 +75,7 @@ public protocol OAIImageReferenceProtocol: OAIImageProtocol, ObservableObject, A
     var children: [S] {get set}
 
 }
-public enum ChildType: String, Sendable, Codable{
+public enum ChildType: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
     case variation
     case edit
     case top

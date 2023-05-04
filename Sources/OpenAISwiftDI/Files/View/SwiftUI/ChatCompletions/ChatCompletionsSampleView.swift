@@ -24,6 +24,7 @@ public struct ChatCompletionsSampleView: View {
                             Text(message.role.rawValue.capitalized) + Text(":")
                             Spacer()
                             Text(message.content)
+                                .textSelection(.enabled)
                         }.id(idx)
                     }
                 }

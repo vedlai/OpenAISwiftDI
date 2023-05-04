@@ -34,6 +34,10 @@ public protocol OpenAIProviderProtocol {
     func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse
     // Given a list of messages describing a conversation, the model will return a response.
     func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) -> AsyncThrowingStream<ChatCompletionsResponse, Error>
+    
+    //MARK: Edits
+    func makeEditCall(parameters: EditRequest) async throws -> EditResponse
+
 }
 
 public struct OpenAIProviderKey: InjectionKey {

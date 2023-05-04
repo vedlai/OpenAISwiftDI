@@ -124,7 +124,7 @@ public actor OpenAIImageManager: InjectionKey{
             }
         }
     }
-    public enum ServiceError: LocalizedError, Sendable{
+    public enum ServiceError: String, LocalizedError, Sendable{
         case invalidResponseType
         case unknownError
         case unableToGetData
@@ -134,6 +134,10 @@ public actor OpenAIImageManager: InjectionKey{
         case maskMustHaveTransparentAreas
         case imageAndMaskSizeMustMatch
         case imageMustMatchMaskSize
+        
+        public var errorDescription: String?{
+            rawValue.localizedCapitalized.camelCaseToWords()
+        }
     }
 }
 extension OpenAIImageManager{

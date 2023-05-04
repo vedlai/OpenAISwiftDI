@@ -56,7 +56,7 @@ public struct CompletionsRequest: Codable, Equatable, Hashable, Identifiable, Se
         case topP = "top_p"
         case n, stream, logprobs, stop
     }
-    public enum CompletionsModel: String, Codable, Equatable, Hashable, Sendable{
+    public enum CompletionsModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
         case textDavinci3 = "text-davinci-003"
         case textDavinci2 = "text-davinci-002"
         case textCurie1 = "text-curie-001"

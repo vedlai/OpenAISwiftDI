@@ -7,7 +7,8 @@
 
 import Foundation
 ///Mock Provider that returns basic examples with minimal processing. Useful for `Previews`.
-struct MockOpenAIProvider: OpenAIProviderProtocol{    
+struct MockOpenAIProvider: OpenAIProviderProtocol{
+    
     var fail: Bool = false
     //
     func checkModeration(input: String, model: ModerationModels) async throws -> ModerationResponseModel {

@@ -10,7 +10,7 @@ import SwiftUI
 @available(iOS 15.0, *)
 ///https://platform.openai.com/docs/api-reference/images/create-variation
 public struct ImageVariationSampleView: View {
-    @State private var request: ImageVariationRequestModel = .init(image: .init(), n: 1, size: .small)
+    @State private var request: ImageVariationRequestModel = .init(image: .init(), n: 1, size: .medium)
     @State private var response: ImageResponseModel?
     public init(){}
     public var body: some View {

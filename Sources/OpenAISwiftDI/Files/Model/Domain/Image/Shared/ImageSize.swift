@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public enum ImageSize: String, CaseIterable, Sendable, Codable, CustomStringConvertible{
+public enum ImageSize: String, Codable, Equatable, Hashable, Sendable, CaseIterable, CustomStringConvertible{
     ///"256x256"
     case small = "256x256"
     ///"512x512"

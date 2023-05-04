@@ -9,6 +9,7 @@ import SwiftUI
 ///`URLSession` based provider to be used as a starting point,
 ///not intended for production since it requires that the API key be included Client-Side
 public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
+        
     ///Contains the scheme and host for OpenAPI
     let urlComponents: URLComponents = {
         var c = URLComponents()
@@ -141,9 +142,12 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
         let encoder: JSONEncoder = .init()
         return try encoder.encode(model)
     }
-    enum ProviderErrors: LocalizedError{
+    enum ProviderErrors: String, LocalizedError{
         case invalidResponseType
-        case unableToRetreiveImagePNGData
-        case unableToRetreiveMaskPNGData
+        case unableToRetreiveImagePngData
+        case unableToRetreiveMaskPngData
+        public var errorDescription: String?{
+            rawValue.localizedCapitalized.camelCaseToWords()
+        }
     }
 }

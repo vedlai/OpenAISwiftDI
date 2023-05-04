@@ -13,4 +13,5 @@ public enum OpenAIEndpoints: String{
     case imagesVariations = "/v1/images/variations"
     case moderations = "/v1/moderations"
     case chatCompletions = "/v1/chat/completions"
+    case edits = "/v1/edits"
 }

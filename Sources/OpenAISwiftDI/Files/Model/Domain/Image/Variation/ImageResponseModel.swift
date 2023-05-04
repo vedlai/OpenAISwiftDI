@@ -87,9 +87,12 @@ public class MyImage: NSObject, Codable {
         value = .init(data: data)
     }
     
-    enum ImageError: LocalizedError{
+    enum ImageError: String, LocalizedError{
         case unableToAddAplhaToImage
         case dataIsMissingOrInavalid
+        public var errorDescription: String?{
+            rawValue.localizedCapitalized.camelCaseToWords()
+        }
     }
 }
 #endif

@@ -73,6 +73,13 @@ public actor OpenAICompletionsManager: InjectionKey{
         try parameters.validate()
         return provider.makeChatCompletionsCallStream(parameters: parameters)
     }
+    
+    ///Validates and makes request
+    ///https://platform.openai.com/docs/api-reference/edits/create
+    func makeEditsCall(parameters: EditRequest) async throws -> EditResponse{
+        try parameters.validate()
+        return try await provider.makeEditCall(parameters: parameters)
+    }
 
 }
 

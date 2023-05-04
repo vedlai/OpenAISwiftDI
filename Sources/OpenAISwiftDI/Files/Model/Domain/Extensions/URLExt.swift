@@ -46,9 +46,12 @@ extension URL {
         task.resume()
     }
     
-    fileprivate enum ServiceError: LocalizedError, Sendable{
+    fileprivate enum ServiceError: String, LocalizedError, Sendable{
         case unableToGetImageFromURL
         case invalidResponseType
+        public var errorDescription: String?{
+            rawValue.localizedCapitalized.camelCaseToWords()
+        }
     }
     
 }

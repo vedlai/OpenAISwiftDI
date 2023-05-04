@@ -21,7 +21,7 @@ public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable{
     public var user: String?
     
     ///https://platform.openai.com/docs/models/model-endpoint-compatibility
-    public enum ChatModel: String, Codable, Equatable, Hashable, Sendable{
+    public enum ChatModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
         case gpt4 = "gpt-4"
         case gpt4_314 = "gpt-4-0314"
         case gpt4_4_32k = "gpt-4-32k"
@@ -61,52 +61,43 @@ public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable{
         guard try messages.allSatisfy({ m in
             if let name = m.name {
                 guard name.count <= 64 else {
-                    throw ModelError.custom("Max name letter count is 64")
+                    throw PackageErrors.custom("Max name letter count is 64")
                 }
                 let namePattern = "[a-zA-Z0-9_]{\(name.count)}"
 
                 guard (name.range(of: namePattern, options:.regularExpression)?.upperBound.utf16Offset(in: name) == name.count) else {
-                    throw ModelError.custom("Name must be composed of letters numbers and underscore.")
+                    throw PackageErrors.custom("Name must be composed of letters numbers and underscore.")
                 }
                 return true
             }else{
                 return true //name is optional per documentation
             }
         }) else {
-            throw ModelError.custom("Chat Messsages must have a valid name that only contains letters, numbers and underscore.")
+            throw PackageErrors.custom("Chat Messsages must have a valid name that only contains letters, numbers and underscore.")
         }
         
         guard (temperature == nil && top_p == nil) || (temperature != nil && top_p == nil) || (temperature == nil && top_p != nil) else{
-            throw ModelError.custom("use temperature or top_p but not both")
+            throw PackageErrors.custom("use temperature or top_p but not both")
         }
         //temp
         if let temp = temperature, !(0...2).contains(temp){
-            throw ModelError.custom("temperature should be between 0...2")
+            throw PackageErrors.custom("temperature should be between 0...2")
         }
         if let top_p = top_p, !(0...1).contains(top_p){
-            throw ModelError.custom("top_p should be between 1 & 0")
+            throw PackageErrors.custom("top_p should be between 1 & 0")
         }
         guard model.validTokens(entry: max_tokens) else {
             throw PackageErrors.custom("Max tokens for \(model.rawValue) is \(model.maxTokens)")
         }
         
         if let presence_penalty = presence_penalty, !(-2...2).contains(presence_penalty){
-            throw ModelError.custom("presence_penalty should be a number between -2.0 and 2.0. ")
+            throw PackageErrors.custom("presence_penalty should be a number between -2.0 and 2.0. ")
         }
         if let frequency_penalty = frequency_penalty, !(-2...2).contains(frequency_penalty){
-            throw ModelError.custom("frequency_penalty should be a number between -2.0 and 2.0. ")
+            throw PackageErrors.custom("frequency_penalty should be a number between -2.0 and 2.0. ")
         }
     }
     
-    public enum ModelError: LocalizedError{
-        case custom(String)
-        public var errorDescription: String?{
-            switch self{
-            case .custom(let string):
-                return string
-            }
-        }
-    }
 }
 ///https://platform.openai.com/docs/api-reference/chat
 public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable{

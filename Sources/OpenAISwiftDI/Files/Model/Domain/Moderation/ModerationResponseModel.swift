@@ -97,7 +97,7 @@ public struct OAIModCategoryScoresModel: Codable, Sendable {
         case violenceGraphic = "violence/graphic"
     }
 }
-public enum ModerationModels: String, Sendable{
+public enum ModerationModels: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
     case textModerationStable = "text-moderation-stable"
     case textModerationLatest = "text-moderation-latest"
 }

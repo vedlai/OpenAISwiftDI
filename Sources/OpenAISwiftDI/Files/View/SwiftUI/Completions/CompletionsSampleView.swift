@@ -25,6 +25,7 @@ public struct CompletionsSampleView: View {
             Section("Response") {
                 if let firstChoice = response?.choices.first{
                     Text(firstChoice.text)
+                        .textSelection(.enabled)
                 }else{
                     Text("Submit a request to see a response.")
                 }

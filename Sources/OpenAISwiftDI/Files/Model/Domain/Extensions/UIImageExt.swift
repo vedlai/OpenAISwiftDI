@@ -25,11 +25,14 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return newImage
     }
-    fileprivate enum ImageError: LocalizedError{
+    fileprivate enum ImageError: String, LocalizedError{
         case unableToAddAplhaToImage
         case dataIsMissingOrInavalid
         case noDataAvailable
         case noImageAvaiable
+        public var errorDescription: String?{
+            rawValue.localizedCapitalized.camelCaseToWords()
+        }
     }
 }
 

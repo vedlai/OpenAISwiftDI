@@ -1,22 +1,31 @@
 # OpenAISwiftDI
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fadamrushy%2FOpenAISwift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/adamrushy/OpenAISwift)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fadamrushy%2FOpenAISwift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/adamrushy/OpenAISwift)
+
+![](https://img.shields.io/github/license/adamrushy/OpenAISwift)
+![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/adamrushy/OpenAISwift/swift.yml?branch=main)
+[![](https://img.shields.io/badge/SPM-supported-DE5C43.svg?style=flat)](https://swift.org/package-manager/)
+
 OpenAI + Swift + Dependecy Injection
 
 OpenAISwiftDI is a Swift is a community maintained package to communicate with [OpenAI API](https://platform.openai.com/docs/introduction) this package will use Dependecy Injection to facilitate development of a client-side application while waiting for a server-side environment.
 
 ⚠️ OpenAI advises that the API key is not included in client-side applications, requests should be processed through a backend service. 
 
-The `Package` includes a `URLSession` based `Provider` that serves as a starting point but is not intended for Production environments.
+The `Package` includes a `URLSession` based `Provider` that serves as a starting point but is not intended for Production environments. It works with the API but does not abide by all the best practices set forth by OpenAI.
 
 The package's `Request` models all have a `validate()` that is capable of doing basic checks of the models before sending them to the provider.
 
 **Setup**
+
 Add the dependency.
 
 ```swift
 .package(url: "https://github.com/vedlai/OpenAISwiftDI", from: "1.0.0")
 ```
 **Getting Started**
+
 Import the package.
 ```swift
 import OpenAIDI
@@ -31,6 +40,9 @@ let org: String = ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION"]
 
 InjectedValues[\.openAIProvider] = URLSessionOpenAIProvider(apiKey: key, orgId: org)
 ```
+
+If you don't inject a `Provider` the app will use `MockOpenAIProvider`. This provider generates sample responses. The intent behind this is to have something that behaves as if it is working but everything is hardcoded. It is ideal for `Previews` where quick (Free) responses are needed when creating the User Interface.
+
 Then access the provider using the `@Injected` property wrapper.
 
 ```swift
@@ -56,6 +68,8 @@ ImageCreateSampleView()
 ImageEditWithMaskSampleView()
 
 ImageVariationSampleView()
+
+EditsSampleView()
 ```
 
 **Supported Endpoints**
@@ -67,6 +81,7 @@ public enum OpenAIEndpoints: String{
     case imagesVariations = "/v1/images/variations"
     case moderations = "/v1/moderations"
     case chatCompletions = "/v1/chat/completions"
+    case edits = "v1/edits"
 }
 ```
 More to come...
@@ -81,7 +96,7 @@ Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. Might 
 
 When using `URLSessionOpenAIProvider`, Completions and Chat Completions streams are limited to iOS 15+ and macOS 12+.
 
-Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task`, their purpose is to be quick prototypes that demostrate functionality.
+Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task` & `.textSelection(.enabled)`, their purpose is to be quick prototypes that demostrate functionality.
 
 **License**
 
