@@ -54,23 +54,24 @@ or access one of the Manager's with built in checks such as verifiying propertie
 
 **Chat Completions**
 
-    [ChatCompletionsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Chat.png)
+[ChatCompletionsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Chat.png)
     
 **Completions**
 
-    [CompletionsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Completions.png)
+[CompletionsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Completions.png)
 
 **Images**
 
-    [ImageCreateSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageCreate.png)
-    [ImageEditWithMaskSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageEditWMask.png)
-    [ImageVariationSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageVariation.png)
+[ImageCreateSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageCreate.png)
+[ImageEditWithMaskSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageEditWMask.png)
+[ImageVariationSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageVariation.png)
 
 **Edits**
 
-    [EditsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Edits.png)
+[EditsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Edits.png)
 
 **Supported Endpoints**
+
 ```swift
 public enum OpenAIEndpoints: String{
     case completions = "/v1/completions"
