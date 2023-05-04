@@ -63,7 +63,9 @@ or access one of the Manager's with built in checks such as verifiying propertie
 **Images**
 
 [ImageCreateSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageCreate.png)
+
 [ImageEditWithMaskSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageEditWMask.png)
+
 [ImageVariationSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageVariation.png)
 
 **Edits**
