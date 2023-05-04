@@ -51,19 +51,24 @@ or access one of the Manager's with built in checks such as verifiying propertie
 ```
 
 **Available Sample Views**
-```swift
-ChatCompletionsSampleView()
 
-CompletionsSampleView()
+**Chat Completions**
 
-ImageCreateSampleView()
+    [ChatCompletionsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Chat.png)
+    
+**Completions**
 
-ImageEditWithMaskSampleView()
+    [CompletionsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Completions.png)
 
-ImageVariationSampleView()
+**Images**
 
-EditsSampleView()
-```
+    [ImageCreateSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageCreate.png)
+    [ImageEditWithMaskSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageEditWMask.png)
+    [ImageVariationSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/ImageVariation.png)
+
+**Edits**
+
+    [EditsSampleView](https://github.com/vedlai/OpenAISwiftDI/blob/main/Sources/OpenAISwiftDI/Showcase/Images/Edits.png)
 
 **Supported Endpoints**
 ```swift
