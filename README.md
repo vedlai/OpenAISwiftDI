@@ -52,11 +52,11 @@ or access one of the Manager's with built in checks such as verifiying propertie
 @Injected(\.openAICompletionsMgr) var openAICompletionsMgr
 ```
 
-##**Available Methods
+##**Available Methods**##
 
 See [OpenAIProviderProtocol](/Sources/OpenAISwiftDI/Files/Model/Service/OpenAIProvider/OpenAIProviderProtocol.swift)
 
-##**Sample Views
+##**Sample Views**##
 
 ***Chat Completions***
 
