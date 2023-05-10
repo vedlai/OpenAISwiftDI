@@ -11,14 +11,14 @@ The `Package` includes a `URLSession` based `Provider` that serves as a starting
 
 The package's `Request` models all have a `validate()` that is capable of doing basic checks of the models before sending them to the provider.
 
-##**Setup
+# Setup
 
 Add the dependency.
 
 ```swift
 .package(url: "https://github.com/vedlai/OpenAISwiftDI", from: "1.0.2")
 ```
-##**Getting Started
+# Getting Started
 
 Import the package.
 
@@ -52,11 +52,11 @@ or access one of the Manager's with built in checks such as verifiying propertie
 @Injected(\.openAICompletionsMgr) var openAICompletionsMgr
 ```
 
-#Available Methods
+# Available Methods
 
 See [OpenAIProviderProtocol](/Sources/OpenAISwiftDI/Files/Model/Service/OpenAIProvider/OpenAIProviderProtocol.swift)
 
-#Sample Views
+# Sample Views
 
 ***Chat Completions***
 
@@ -78,7 +78,7 @@ See [OpenAIProviderProtocol](/Sources/OpenAISwiftDI/Files/Model/Service/OpenAIPr
 
 [EditsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Edits.png)
 
-#Supported Endpoints
+# Supported Endpoints
 
 ```swift
 public enum OpenAIEndpoints: String{
@@ -93,11 +93,11 @@ public enum OpenAIEndpoints: String{
 ```
 More to come...
 
-#Contribute
+# Contribute
 
 Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues](https://github.com/vedlai/OpenAISwiftDI/issues).
 
-#Known Limitations
+# Known Limitations
 
 1. Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. 
 
@@ -105,7 +105,7 @@ Contributions for improvements are welcomed. Feel free to submit a pull request 
 
 3. Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task` & `.textSelection(.enabled)`, their purpose is to be quick prototypes that demostrate functionality.
 
-#License
+# License
 
 MIT License
 
