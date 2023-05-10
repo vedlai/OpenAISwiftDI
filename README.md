@@ -1,4 +1,4 @@
-# **OpenAISwiftDI
+# OpenAISwiftDI
 
 OpenAI + Swift + Dependecy Injection
 
@@ -8,6 +8,8 @@ OpenAISwiftDI is a Swift is a community maintained package to communicate with [
 ⚠️ OpenAI advises that the API key is not included in client-side applications, requests should be processed through a backend service. 
 
 The `Package` includes a `URLSession` based `Provider` that serves as a starting point but is not intended for Production environments. It works with the API but does not abide by all the best practices set forth by OpenAI.
+
+You should create your own provider that confroms to `OpenAIProviderProtocol` and follows OpenAI's [Production Best Practices](https://platform.openai.com/docs/guides/production-best-practices).
 
 The package's `Request` models all have a `validate()` that is capable of doing basic checks of the models before sending them to the provider.
 
