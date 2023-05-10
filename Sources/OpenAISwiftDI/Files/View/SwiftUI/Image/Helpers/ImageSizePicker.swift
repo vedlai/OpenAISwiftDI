@@ -9,12 +9,12 @@ import SwiftUI
 
 public struct ImageSizePicker: View {
     @Binding var size: ImageSize
-    public init(size: Binding<ImageSize>){
+    public init(size: Binding<ImageSize>) {
         self._size = size
     }
     public var body: some View {
-        Picker("Image size", selection: $size) {
-            ForEach(ImageSize.allCases, id:\.rawValue) { size in
+        Picker(.getString(.imageSize), selection: $size) {
+            ForEach(ImageSize.allCases, id: \.rawValue) { size in
                 Text(size.rawValue)
                     .tag(size)
             }

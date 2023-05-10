@@ -14,57 +14,66 @@ public struct CompletionsRequest: Codable, Equatable, Hashable, Identifiable, Se
     public var prompt: String
     public var maxTokens: Int = 75
     public var temperature: Double? = 1.4
-    public var topP: Int? = nil
-    public var n: Int = 1
+    public var topP: Int?
+    public var number: Int = 1
     public var stream: Bool? = true
-    public var logprobs: String? = nil
-    public var stop: String? = nil
-    public var presence_penalty: Double?
-    public var frequency_penalty: Double?
-    public var user: String? = nil
-    
-    public init(prompt: String){
+    public var logprobs: String?
+    public var stop: String?
+    public var presencePenalty: Double?
+    public var frequencyPenalty: Double?
+    public var user: String?
+
+    public init(prompt: String) {
         self.prompt = prompt
     }
-    func validate() throws{
+    func validate() throws {
         guard model.validTokens(entry: maxTokens) else {
-            throw PackageErrors.custom("Max tokens for \(model.rawValue) is \(model.maxTokens ?? .max)")
+            throw PackageErrors.maxTokensForModelIs(model: model.rawValue, tokens: model.maxTokens ?? .max)
         }
-        guard (temperature == nil && topP == nil) || (temperature != nil && topP == nil) || (temperature == nil && topP != nil) else{
-            throw PackageErrors.custom("use temperature or top_p but not both")
+        guard (temperature == nil && topP == nil) ||
+                (temperature != nil && topP == nil) ||
+                (temperature == nil && topP != nil) else {
+            throw PackageErrors.useTemperatureOrTopPButNotBoth
         }
-        //temp
-        if let temp = temperature, !(0...2).contains(temp) {
-            throw PackageErrors.custom("temperature should be between 0...2")
+        let tempRange = 0.0...2.0
+        // temp
+        if let temp = temperature, !(tempRange).contains(temp) {
+            throw PackageErrors.temperatureShouldBeBetween(tempRange)
         }
-        if let top_p = topP, !(0...1).contains(top_p){
-            throw PackageErrors.custom("top_p should be between 1 & 0")
+        let topPRange = 0.0...1.0
+        if let topP = topP, !(0...1).contains(topP) {
+            throw PackageErrors.topPShouldBeBetween(topPRange)
         }
 
-        
-        if let presence_penalty = presence_penalty, !(-2...2).contains(presence_penalty){
-            throw PackageErrors.custom("presence_penalty should be a number between -2.0 and 2.0. ")
+        let presencePenaltyRange = -2.0...2.0
+        if let presencePenalty = presencePenalty, !(presencePenaltyRange).contains(presencePenalty) {
+            throw PackageErrors.presencePenaltyShouldBeBetween(presencePenaltyRange)
         }
-        if let frequency_penalty = frequency_penalty, !(-2...2).contains(frequency_penalty){
-            throw PackageErrors.custom("frequency_penalty should be a number between -2.0 and 2.0. ")
+        let frequencyPenaltyRange = -2.0...2.0
+
+        if let frequencyPenalty = frequencyPenalty, !(frequencyPenaltyRange).contains(frequencyPenalty) {
+            throw PackageErrors.frequencyPenaltyShouldBeBetween(frequencyPenaltyRange)
         }
     }
     public enum CodingKeys: String, CodingKey {
         case model, prompt
-        case maxTokens = "max_tokens"
         case temperature
+        case stream, logprobs, stop
+        case maxTokens = "max_tokens"
         case topP = "top_p"
-        case n, stream, logprobs, stop
+        case number = "n"
+        case presencePenalty = "presence_penalty"
+        case frequencyPenalty = "frequency_penalty"
     }
-    public enum CompletionsModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
+    public enum CompletionsModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
         case textDavinci3 = "text-davinci-003"
         case textDavinci2 = "text-davinci-002"
         case textCurie1 = "text-curie-001"
         case textBabbage1 = "text-babbage-001"
         case textAda1 = "text-ada-001"
-        
-        var maxTokens: Int?{
-            switch self{
+
+        var maxTokens: Int? {
+            switch self {
             case .textDavinci3:
                 return 4097
             case .textDavinci2:
@@ -77,14 +86,11 @@ public struct CompletionsRequest: Codable, Equatable, Hashable, Identifiable, Se
                 return nil
             }
         }
-        func validTokens(entry: Int?, allowOptional: Bool = true) -> Bool{
-            guard let entry = entry else{
+        func validTokens(entry: Int?, allowOptional: Bool = true) -> Bool {
+            guard let entry = entry else {
                 return allowOptional
             }
-
             return entry <= maxTokens ?? .max
         }
     }
 }
-
-

@@ -18,7 +18,7 @@ public struct EditsButtonView: View {
         self._response = response
     }
     public var body: some View {
-        CatchingButton(titleKey: "Edit") {
+        CatchingButton(titleKey: String.edit.key) {
             response = try await manager.makeEditsCall(parameters: request)
         }
     }

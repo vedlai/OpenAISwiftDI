@@ -13,17 +13,16 @@ public struct OAIImageDataModel: OAIImageDataProtocol {
         self.image = image
         self.url = nil
     }
-    
+
     public var mask: UIImage?
     public var image: UIImage?
-    
     public let url: URL?
-    
+
     public init(image: UIImage?, url: URL?) {
         self.image = image
         self.url = url
     }
-    
+
     public init(from decoder: Decoder) throws {
         fatalError("not yet implemented")
     }
@@ -36,20 +35,19 @@ public struct OAIImageDataModel: OAIImageDataProtocol {
 
 }
 
-public protocol OAIImageDataProtocol: Codable, Equatable, Hashable, Sendable{
-    
+public protocol OAIImageDataProtocol: Codable, Equatable, Hashable, Sendable {
     var url: URL? {get}
     var image: UIImage? {get set}
     var mask: UIImage? {get set}
-    
+
     init(image: UIImage?)
     func save() async throws
     mutating func downloadImage() async throws
 }
-extension OAIImageDataProtocol{
-    //MARK: Helpers
+extension OAIImageDataProtocol {
+    // MARK: Helpers
     mutating public func downloadImage() async throws {
-        guard let url = url else{
+        guard let url = url else {
             return
         }
         self.image = try await OpenAIImageManager.downloadImage(url: url)
@@ -58,24 +56,24 @@ extension OAIImageDataProtocol{
 }
 
 public protocol OAIImageProtocol: Codable, Equatable, Hashable, Sendable {
-    associatedtype D : OAIImageDataProtocol
-    var created: Date? {get}
-    var data: [D] { get set}
-    var prompt: String? {get set}
-    var childType: ChildType?  {get set}
-    
-    init(data: [D])
+    associatedtype Data: OAIImageDataProtocol
+    var created: Date? { get }
+    var data: [Data] { get set }
+    var prompt: String? { get set }
+    var childType: ChildType? { get set }
+
+    init(data: [Data])
     func save() async throws
 
 }
 
 public protocol OAIImageReferenceProtocol: OAIImageProtocol, ObservableObject, AnyObject {
-    associatedtype S : OAIImageReferenceProtocol
-    var parent: S? {get set}
-    var children: [S] {get set}
+    associatedtype Same: OAIImageReferenceProtocol
+    var parent: Same? {get set}
+    var children: [Same] {get set}
 
 }
-public enum ChildType: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
+public enum ChildType: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
     case variation
     case edit
     case top

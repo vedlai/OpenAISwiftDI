@@ -11,32 +11,32 @@ import SwiftUI
 public struct EditsSampleView: View {
     @State private var request: EditRequest = .init(instruction: "")
     @State private var response: EditResponse?
-    public init(){}
+    public init() { }
     public var body: some View {
-        Form{
-            Section("Request") {
-                HStack{
-                    Text("Input: ")
-                    TextField("Add input here", text: .init($request.input, ""))
+        Form {
+            Section(.getString(.request)) {
+                HStack {
+                    Text(String.input + ": ")
+                    TextField(.getString(.addInputHere), text: .init($request.input, ""))
                         .lineLimit(1)
                 }
-                HStack{
-                    Text("Instruction: ")
-                    TextField("Add instruction here", text: $request.instruction)
+                HStack {
+                    Text(String.instruction + ": ")
+                    TextField(.getString(.addInstructionHere), text: $request.instruction)
                         .lineLimit(1)
-                        
+
                 }
-                
+
                 EditsButtonView(request: request, response: $response)
                     .disabled(request.instruction.isEmpty)
                     .buttonStyle(.borderedProminent)
 
             }
-            Section("Response") {
-                if let first = response?.choices.first{
+            Section(.getString(.response)) {
+                if let first = response?.choices.first {
                     Text(first.text)
-                }else{
-                    Text("Enter input and response, then submit.")
+                } else {
+                    Text(.getString(.enterInputAndResponse))
                 }
             }
         }

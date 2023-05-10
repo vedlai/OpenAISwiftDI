@@ -6,8 +6,8 @@
 //
 
 import Foundation
-extension URLSessionOpenAIProvider{
-    //MARK: Edit
+extension URLSessionOpenAIProvider {
+    // MARK: Edit
     public func makeEditCall(parameters: EditRequest) async throws -> EditResponse {
         try await makeCall(parameters, endpoint: .edits)
     }

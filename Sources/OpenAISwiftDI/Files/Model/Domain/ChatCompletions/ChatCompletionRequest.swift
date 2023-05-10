@@ -6,47 +6,66 @@
 //
 
 import SwiftUI
-///https://platform.openai.com/docs/api-reference/chat
-public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable{
-    public var model: ChatModel = .gpt3_5Turbo
+/// https://platform.openai.com/docs/api-reference/chat
+public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable {
+    public var model: ChatModel = .gpt35Turbo
     public var messages: [ChatMessage] = []
     public var temperature: Double?
-    public var top_p: Double?
-    public var n: Int = 1
+    public var topP: Double?
+    public var number: Int = 1
     public var stream: Bool = false
     public var stop: [String]?
-    public var max_tokens: Int?
-    public var presence_penalty: Double?
-    public var frequency_penalty: Double?
+    public var maxTokens: Int?
+    public var presencePenalty: Double?
+    public var frequencyPenalty: Double?
     public var user: String?
-    
-    ///https://platform.openai.com/docs/models/model-endpoint-compatibility
-    public enum ChatModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
+
+    enum CodingKeys: String, CodingKey {
+        case model
+        case messages
+        case temperature
+        case topP = "top_p"
+        case number = "n"
+        case stream
+        case stop
+        case maxTokens = "max_tokens"
+        case presencePenalty = "presence_penalty"
+        case frequencyPenalty = "frequency_penalty"
+    }
+
+    /// https://platform.openai.com/docs/models/model-endpoint-compatibility
+    public enum ChatModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
+        /// gpt-4
         case gpt4 = "gpt-4"
-        case gpt4_314 = "gpt-4-0314"
-        case gpt4_4_32k = "gpt-4-32k"
-        case gpt4_4_32k_314 = "gpt-4-32k-0314"
-        case gpt3_5Turbo = "gpt-3.5-turbo"
-        case gpt3_5Turbo_301 = "gpt-3.5-turbo-0301"
-        
+        /// gpt-4-0314
+        case gpt4314 = "gpt-4-0314"
+        /// gpt-4-32k
+        case gpt4432k = "gpt-4-32k"
+        /// gpt-4-32k-0314
+        case gpt4432k314 = "gpt-4-32k-0314"
+        /// gpt-3.5-turbo
+        case gpt35Turbo = "gpt-3.5-turbo"
+        /// gpt-3.5-turbo-0301
+        case gpt35Turbo301 = "gpt-3.5-turbo-0301"
+
         var maxTokens: Int {
-            switch self{
+            switch self {
             case .gpt4:
                 return 8192
-            case .gpt4_314:
+            case .gpt4314:
                 return 8192
-            case .gpt4_4_32k:
+            case .gpt4432k:
                 return 32768
-            case .gpt4_4_32k_314:
+            case .gpt4432k314:
                 return 32768
-            case .gpt3_5Turbo:
+            case .gpt35Turbo:
                 return 4096
-            case .gpt3_5Turbo_301:
+            case .gpt35Turbo301:
                 return 4096
             }
         }
-        func validTokens(entry: Int?, allowOptional: Bool = true) -> Bool{
-            guard let entry = entry else{
+        func validTokens(entry: Int?, allowOptional: Bool = true) -> Bool {
+            guard let entry = entry else {
                 return allowOptional
             }
             return entry <= maxTokens
@@ -56,56 +75,64 @@ public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable{
      Validates that the model value has the recommended settings per OpenAI documentation
      */
     public func validate() throws {
-                
-        //Name
-        guard try messages.allSatisfy({ m in
-            if let name = m.name {
+        // Name
+        _ = try messages.allSatisfy({ message in
+            if let name = message.name {
                 guard name.count <= 64 else {
-                    throw PackageErrors.custom("Max name letter count is 64")
+                    throw PackageErrors.maxLetterCountIs(64)
                 }
                 let namePattern = "[a-zA-Z0-9_]{\(name.count)}"
 
-                guard (name.range(of: namePattern, options:.regularExpression)?.upperBound.utf16Offset(in: name) == name.count) else {
-                    throw PackageErrors.custom("Name must be composed of letters numbers and underscore.")
+                guard name
+                    .range(of: namePattern, options: .regularExpression)?
+                    .upperBound
+                    .utf16Offset(in: name) == name.count else {
+                    throw PackageErrors.nameComponents
                 }
                 return true
-            }else{
-                return true //name is optional per documentation
+            } else {
+                return true // name is optional per documentation
             }
-        }) else {
-            throw PackageErrors.custom("Chat Messsages must have a valid name that only contains letters, numbers and underscore.")
+        })
+
+        guard (temperature == nil && topP == nil) ||
+                (temperature != nil && topP == nil) ||
+                (temperature == nil && topP != nil) else {
+            throw PackageErrors.useTemperatureOrTopPButNotBoth
         }
-        
-        guard (temperature == nil && top_p == nil) || (temperature != nil && top_p == nil) || (temperature == nil && top_p != nil) else{
-            throw PackageErrors.custom("use temperature or top_p but not both")
+        let tempRange = 0.0...2.0
+        // temp
+        if let temp = temperature, !(tempRange).contains(temp) {
+            throw PackageErrors.temperatureShouldBeBetween(tempRange)
         }
-        //temp
-        if let temp = temperature, !(0...2).contains(temp){
-            throw PackageErrors.custom("temperature should be between 0...2")
+        let topPRange = 0.0...1.0
+
+        if let topP = topP, !(topPRange).contains(topP) {
+            throw PackageErrors.topPShouldBeBetween(topPRange)
         }
-        if let top_p = top_p, !(0...1).contains(top_p){
-            throw PackageErrors.custom("top_p should be between 1 & 0")
+        guard model.validTokens(entry: maxTokens) else {
+            throw PackageErrors.maxTokensForModelIs(model: model.rawValue, tokens: model.maxTokens)
         }
-        guard model.validTokens(entry: max_tokens) else {
-            throw PackageErrors.custom("Max tokens for \(model.rawValue) is \(model.maxTokens)")
+        let presencePenaltyRange = -2.0...2.0
+
+        if let presencePenalty = presencePenalty, !(presencePenaltyRange).contains(presencePenalty) {
+            throw PackageErrors.presencePenaltyShouldBeBetween(presencePenaltyRange)
         }
-        
-        if let presence_penalty = presence_penalty, !(-2...2).contains(presence_penalty){
-            throw PackageErrors.custom("presence_penalty should be a number between -2.0 and 2.0. ")
-        }
-        if let frequency_penalty = frequency_penalty, !(-2...2).contains(frequency_penalty){
-            throw PackageErrors.custom("frequency_penalty should be a number between -2.0 and 2.0. ")
+        let frequencyPenaltyRange = -2.0...2.0
+
+        if let frequencyPenalty = frequencyPenalty, !(frequencyPenaltyRange).contains(frequencyPenalty) {
+            throw PackageErrors.frequencyPenaltyShouldBeBetween(frequencyPenaltyRange)
         }
     }
-    
+
 }
-///https://platform.openai.com/docs/api-reference/chat
-public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable{
+/// https://platform.openai.com/docs/api-reference/chat
+public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable {
     public var id: UUID = .init()
     public let role: Role
     public var content: String
     public let name: String?
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.role = try container.decode(ChatMessage.Role.self, forKey: .role)
@@ -118,35 +145,34 @@ public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable{
         case content
         case name
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.role, forKey: .role)
         try container.encode(self.content, forKey: .content)
         try container.encodeIfPresent(self.name, forKey: .name)
     }
-    
-    public init(role: Role = .user, content: String, name: String? = nil){
+
+    public init(role: Role = .user, content: String, name: String? = nil) {
         self.role = role
         self.content = content
         self.name = name
     }
-    
-    
-    public enum Role: String, CustomStringConvertible, Codable, Equatable, Hashable, Identifiable, Sendable{
-        public var id: String{
+
+    public enum Role: String, CustomStringConvertible, Codable, Equatable, Hashable, Identifiable, Sendable {
+        public var id: String {
             rawValue
         }
         case system
         case user
         case assistant
-        public var description: String{
+        public var description: String {
             rawValue
         }
     }
 }
 
-public struct DeltaMessage: Codable, Equatable, Hashable, Sendable{
+public struct DeltaMessage: Codable, Equatable, Hashable, Sendable {
     public let role: ChatMessage.Role?
     public var content: String?
     public let name: String?

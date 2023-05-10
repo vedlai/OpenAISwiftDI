@@ -8,19 +8,18 @@
 import SwiftUI
 
 @available(macOS 12.0, *)
-@available(macOS 12.0, *)
 @available(iOS 15.0, *)
-struct CatchingButton<Label>: View where Label : View{
+struct CatchingButton<Label>: View where Label: View {
     let label: Label
     let action: () async throws -> Void
     @State private var isProcessing: Bool = false
     @State private var showingAlert: (Bool, LocalError?) = (false, nil)
-    
+
     init(@ViewBuilder label: () -> Label, action: @escaping () async throws -> Void) {
         self.label = label()
         self.action = action
     }
-    
+
     init(titleKey: LocalizedStringKey, action: @escaping () async throws -> Void) where Label == Text {
         self.label = Text(titleKey)
         self.action = action
@@ -31,33 +30,32 @@ struct CatchingButton<Label>: View where Label : View{
         } label: {
             label
                 .overlay {
-                    if isProcessing{
-                        ZStack{
+                    if isProcessing {
+                        ZStack {
                             Color.white.opacity(0.7)
                                 .blur(radius: 5)
                             ProgressView()
-                        }
-                            .task {
-                                do{
+                        }.task {
+                                do {
                                     try await action()
-                                }catch{
+                                } catch {
                                     showingAlert = (true, .system(error))
-                                    print("🛑 ERROR: \(error)")
+                                    print("🛑 :: \(type(of: self)) :: Alert :: ERROR: \(error)")
                                 }
                                 isProcessing = false
                             }
                     }
                 }
         }.alert(isPresented: $showingAlert.0, error: showingAlert.1) {
-            SwiftUI.Button("Ok") {
+            SwiftUI.Button(.getString(.okay)) {
                 showingAlert = (false, nil)
             }
         }
     }
-    enum LocalError: LocalizedError{
+    enum LocalError: LocalizedError {
         case system(Error)
-        var errorDescription: String?{
-            switch self{
+        var errorDescription: String? {
+            switch self {
             case .system(let error):
                 return error.localizedDescription
             }

@@ -6,11 +6,11 @@
 //
 #if canImport(UIKit)
 import SwiftUI
-extension MockOpenAIProvider{
-    func generateImage<O>(request: ImageCreateRequestModel) async throws -> O where O : OAIImageProtocol {
+extension MockOpenAIProvider {
+    func generateImage<O>(request: ImageCreateRequestModel) async throws -> O where O: OAIImageProtocol {
         try request.validate()
         let image = await MainActor.run {
-            ZStack{
+            ZStack {
                 Color.green
                 Text(request.prompt) +
                 Text(request.size.rawValue)
@@ -18,43 +18,52 @@ extension MockOpenAIProvider{
                 .frame(width: request.size.size, height: request.size.size)
                 .snapshot()
         }
-        return .init(data: [.init(image:image)])
+        return O(data: [.init(image: image)])
     }
-    func generateImageEditWMask<O>(request: ImageEditRequestModel) async throws -> O where O : OAIImageProtocol {
+    func generateImageEditWMask<O>(request: ImageEditRequestUniModel) async throws -> O where O: OAIImageProtocol {
         try request.validate()
-        
+
         let image = await MainActor.run {
-            
-        ZStack{
+
+        ZStack {
             Color.green
             Text(request.prompt) +
             Text(request.size.rawValue)
-            Image(uiImage: request.mask!)
+            if let mask = request.mask, let image = UIImage(data: mask) {
+                Image(uiImage: image)
+            } else {
+                Text(String.maskIsNotValidImage)
+            }
         }.aspectRatio(1, contentMode: .fit)
                 .frame(width: request.size.size)
                 .snapshot()
         }
-        return .init(data: [.init(image:image)])
-        
+        return .init(data: [.init(image: image)])
+
     }
-    func generateImageEdit<O>(request: ImageEditRequestModel) async throws -> O where O : OAIImageProtocol {
+    func generateImageEdit<O>(request: ImageEditRequestUniModel) async throws -> O where O: OAIImageProtocol {
         try request.validate()
         let image = await MainActor.run {
-            return ZStack{
+            return ZStack {
                 Color.green
                 Text(request.prompt) +
                 Text(request.size.rawValue)
-                Image(uiImage: request.image)
+                if let image = UIImage(data: request.image) {
+                    Image(uiImage: image)
+                } else {
+                    Text(String.imageIsNotValid)
+                }
             }.aspectRatio(1, contentMode: .fit)
                 .frame(width: request.size.size)
                 .snapshot()
         }
-        return .init(data: [.init(image:image)])
+        return .init(data: [.init(image: image)])
     }
-    func generateImageVariation<O>(request: ImageVariationRequestModel) async throws -> O where O : OAIImageProtocol {
+
+    func generateImageVariation<O>(request: ImageVariationRequestModel) async throws -> O where O: OAIImageProtocol {
         try request.validate()
         let image = await MainActor.run {
-            ZStack{
+            ZStack {
                 Text(request.size.rawValue)
                 Image(uiImage: request.image)
                     .resizable()
@@ -62,13 +71,16 @@ extension MockOpenAIProvider{
                     .fill(Color.red)
                     .border(Color.blue)
                     .frame(width: 20)
-                    .position(.init(x: (0...Int(request.size.size)).randomElement()!, y: (0...Int(request.size.size)).randomElement()!))
+                    .position(.init(x: (0...Int(request.size.size))
+                        .randomElement()!,
+                                    y: (0...Int(request.size.size))
+                        .randomElement()!))
         }
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: request.size.size)
                 .snapshot()
         }
-        return .init(data: [.init(image:image)])
+        return .init(data: [.init(image: image)])
     }
 }
 #endif

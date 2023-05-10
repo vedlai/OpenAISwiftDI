@@ -7,76 +7,79 @@
 #if canImport(UIKit)
 import SwiftUI
 
-public actor OpenAIImageManager: InjectionKey{
+public actor OpenAIImageManager: InjectionKey {
     public static var currentValue: OpenAIImageManager = OpenAIImageManager()
-    
+
     @Injected(\.openAIProvider) var service
-    //MARK: Moderation
-    ///Throws error if the `string` was flagged.
-    ///https://platform.openai.com/docs/api-reference/moderations
-    func checkModeration(string: String, model: ModerationModels = .textModerationLatest) async throws -> ModerationResponseModel{
+    // MARK: Moderation
+    /// Throws error if the `string` was flagged.
+    /// https://platform.openai.com/docs/api-reference/moderations
+    func checkModeration(string: String,
+                         model: ModerationModels = .textModerationLatest) async throws -> ModerationResponseModel {
         var object = try await service.checkModeration(input: string, model: model)
-        
+
         object.prompt = string
-        
+
         return try object.check()
     }
-    
-    //MARK: Creation
-    ///https://platform.openai.com/docs/api-reference/images/create
-    public func generateImage<O>(request: ImageCreateRequestModel) async throws -> O  where O : OAIImageProtocol{
+
+    // MARK: Creation
+    /// https://platform.openai.com/docs/api-reference/images/create
+    public func generateImage<O>(request: ImageCreateRequestModel) async throws -> O  where O: OAIImageProtocol {
         let stream = generateImage(request: request, type: O.self)
-        var image: O? = nil
+        var image: O?
         for try await step in stream {
             switch step {
-            case .image(let i):
-                image = i
-            case .progress(_):
+            case .image(let img):
+                image = img
+            case .progress:
                 break
             }
         }
-        if let image = image{
+        if let image = image {
             return image
-        }else{
-            throw ServiceError.invalidResponseType
+        } else {
+            throw ServiceError.tryADifferentPromptDidNotGetAnImage
         }
     }
-    
-    ///https://platform.openai.com/docs/api-reference/images/create
-    public func generateImage<O>(request: ImageCreateRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
+
+    /// https://platform.openai.com/docs/api-reference/images/create
+    public func generateImage<O>(request: ImageCreateRequestModel,
+                                 type ofObject: O.Type) ->
+    AsyncThrowingStream<Steps<O>, Error> where O: OAIImageProtocol {
         return .init { continuation in
             let task = Task.detached { [weak self] in
-                do{
+                do {
                     continuation.yield(.progress(.validating))
-                    
+
                     try request.validate()
-                    guard let self = self else{
+                    guard let self = self else {
                         throw ServiceError.unknownError
                     }
                     continuation.yield(.progress(.checkingPrompt))
-                    
-                    let _ = try await self.checkModeration(string: request.prompt)
-                    
+
+                    _ = try await self.checkModeration(string: request.prompt)
+
                     continuation.yield(.progress(.requestingImage))
-                    
+
                     var object: O = try await self.service.generateImage(request: request)
                     object.prompt = request.prompt
                     object.childType = .top
-                    
+
                     continuation.yield(.progress(.downloadImage))
-                    
+
                     for (idx, data) in object.data.enumerated() {
-                        if let url = data.url{
+                        if let url = data.url {
                             object.data[idx].image = try await Self.downloadImage(url: url)
                         }
                     }
-                    
+
                     try await object.save()
-                    
+
                     continuation.yield(.progress(.finished))
                     continuation.yield(.image(image: object))
                     continuation.finish()
-                }catch{
+                } catch {
                     continuation.finish(throwing: error)
                 }
             }
@@ -85,14 +88,13 @@ public actor OpenAIImageManager: InjectionKey{
             }
         }
     }
-    
-    
-    public enum Steps<O: OAIImageProtocol & Sendable>: Sendable{
+
+    public enum Steps<O: OAIImageProtocol & Sendable>: Sendable {
         case image(image: O)
         case progress(ServiceProgress)
     }
-    public enum ServiceProgress:Int, CustomStringConvertible, Sendable{
-        case checkingPrompt = 0
+    public enum ServiceProgress: String, CustomStringConvertible, Sendable {
+        case checkingPrompt
         case requestingImage
         case decodingResponse
         case finished
@@ -101,30 +103,11 @@ public actor OpenAIImageManager: InjectionKey{
         case modifyingAlpha
         case downloadImage
         case validating
-        public var description: String{
-            switch self{
-            case .checkingPrompt:
-                return "Checking Prompt"
-            case .requestingImage:
-                return "Requesting Image"
-            case .decodingResponse:
-                return "Decoding Response"
-            case .finished:
-                return "Finished"
-            case .transformingToData:
-                return "Transforming To Data"
-            case .checkingAlpha:
-                return "Checking Alpha"
-            case .modifyingAlpha:
-                return "Modifying Alpha"
-            case .downloadImage:
-                return "Downloading Image"
-            case .validating:
-                return "Validating Request"
-            }
+        public var description: String {
+            rawValue.localize()
         }
     }
-    public enum ServiceError: String, LocalizedError, Sendable{
+    public enum ServiceError: String, LocalizedError, Sendable {
         case invalidResponseType
         case unknownError
         case unableToGetData
@@ -134,56 +117,76 @@ public actor OpenAIImageManager: InjectionKey{
         case maskMustHaveTransparentAreas
         case imageAndMaskSizeMustMatch
         case imageMustMatchMaskSize
-        
-        public var errorDescription: String?{
+        case tryADifferentPromptDidNotGetAnImage
+        public var errorDescription: String? {
             rawValue.localizedCapitalized.camelCaseToWords()
         }
     }
 }
-extension OpenAIImageManager{
-    //MARK: Edit API Methods
-    ///https://platform.openai.com/docs/api-reference/images/create-edit
-    public func generateImageEdit<O>(request: ImageEditRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
-        
+extension OpenAIImageManager {
+    // MARK: Edit API Methods
+    /// https://platform.openai.com/docs/api-reference/images/create-edit
+    public func generateImageEdit<O>(request: ImageEditRequestModel,
+                                     type ofObject: O.Type) ->
+    AsyncThrowingStream<Steps<O>, Error> where O: OAIImageProtocol {
+
         return AsyncThrowingStream { continuation in
             let task = Task.detached { [weak self] in
-                do{
+                do {
                     try request.validate()
-                    
-                    guard let self = self else{
+
+                    guard let self = self else {
                         throw ServiceError.unknownError
                     }
-                    
+
                     continuation.yield(.progress(.checkingPrompt))
-                    
-                    let _ = try await self.checkModeration(string: request.prompt)
-                    
+
+                    _ = try await self.checkModeration(string: request.prompt)
+
                     continuation.yield(.progress(.requestingImage))
-                    
-                    
+
+                    guard let image = request.image.pngData() else {
+                        throw PackageErrors.imageMustBeValidPng
+                    }
+
+                    try request.validate()
+
                     var object: O
-                    
-                    if request.mask == nil{
-                        object = try await self.service.generateImageEdit(request: request)
-                    }else{
-                        object = try await self.service.generateImageEditWMask(request: request)
+
+                    if request.mask == nil {
+                        object = try await self
+                            .service
+                            .generateImageEdit(request: .init(image: image,
+                                                              prompt: request.prompt,
+                                                              number: request.number,
+                                                              size: request.size,
+                                                              user: request.user))
+                    } else {
+                        guard let mask = request.mask?.pngData() else {
+                            throw PackageErrors.imageMustBeValidPng
+                        }
+                        object = try await self
+                            .service
+                            .generateImageEditWMask(request: .init(image: image, mask: mask,
+                                prompt: request.prompt, number: request.number,
+                                size: request.size, user: request.user))
                     }
                     object.prompt = request.prompt
                     object.childType = .edit
-                    
+
                     continuation.yield(.progress(.downloadImage))
-                    
+
                     for (idx, data) in object.data.enumerated() {
-                        if let url = data.url{
+                        if let url = data.url {
                             object.data[idx].image = try await Self.downloadImage(url: url)
                         }
                     }
                     try await object.save()
-                    
+
                     continuation.yield(.progress(.finished))
                     continuation.yield(.image(image: object))
                     continuation.finish()
-                }catch{
+                } catch {
                     continuation.finish(throwing: error)
                 }
             }
@@ -192,33 +195,34 @@ extension OpenAIImageManager{
             }
         }
     }
-    //MARK: Variation
-    ///https://platform.openai.com/docs/api-reference/images/create-variation
-    public func generateImageVariation<O>(request: ImageVariationRequestModel, type of : O.Type) -> AsyncThrowingStream<Steps<O>, Error> where O : OAIImageProtocol {
-        
+    // MARK: Variation
+    /// https://platform.openai.com/docs/api-reference/images/create-variation
+    public func generateImageVariation<O>(request: ImageVariationRequestModel,
+                                          type ofObject: O.Type) ->
+    AsyncThrowingStream<Steps<O>, Error> where O: OAIImageProtocol {
+
         return .init { continuation in
             let task = Task.detached { [weak self] in
-                do{
+                do {
                     continuation.yield(.progress(.validating))
-                    
+
                     try request.validate()
-                    
-                    guard let self = self else{
+
+                    guard let self = self else {
                         throw ServiceError.unknownError
                     }
-                    
+
                     continuation.yield(.progress(.requestingImage))
-                    
-                    
+
                     var object: O = try await self.service.generateImageVariation(request: request)
-                    
+
                     object.prompt = "variation"
                     object.childType = .variation
-                    
+
                     continuation.yield(.progress(.downloadImage))
-                    
+
                     for (idx, data) in object.data.enumerated() {
-                        if let url = data.url{
+                        if let url = data.url {
                             object.data[idx].image = try await Self.downloadImage(url: url)
                         }
                     }
@@ -226,7 +230,7 @@ extension OpenAIImageManager{
                     continuation.yield(.progress(.finished))
                     continuation.yield(.image(image: object))
                     continuation.finish()
-                }catch{
+                } catch {
                     continuation.finish(throwing: error)
                 }
             }
@@ -236,9 +240,9 @@ extension OpenAIImageManager{
         }
     }
 }
-extension OpenAIImageManager{
-    public static func downloadImage(url: URL) async throws -> UIImage{
-        
+extension OpenAIImageManager {
+    public static func downloadImage(url: URL) async throws -> UIImage {
+
         return try await url.downloadImage()
     }
 }

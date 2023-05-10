@@ -9,58 +9,60 @@ import SwiftUI
 #if canImport(UIKit)
 @available(iOS 15.0, *)
 public struct ImageEditWithMaskSampleView: View {
-    @State private var request: ImageEditRequestModel = .init(image: .init(), prompt: "", n: 1, size: .medium)
+    @State private var request: ImageEditRequestModel = .init(image: .init(), prompt: "", number: 1, size: .medium)
     @State private var response: ImageResponseModel?
     @Namespace private var responseNamespace
     @Namespace var requestNamespace
-    public init(){}
+    public init() { }
     public var body: some View {
-        ScrollViewReader{ proxy in
-            Form{
-                Section("Request"){
-                    TextField("Enter Prompt Here", text: $request.prompt)
-                    NavigationLink("ShowMask", destination: MaskEditView(image: request.image, mask: $request.mask))
-                    
+        ScrollViewReader { proxy in
+            Form {
+                Section(.getString(.request)) {
+                    TextField(.getString(.enterPromptHere), text: $request.prompt)
+                    NavigationLink(.getString(.showMask),
+                                   destination: MaskEditView(image: request.image, mask: $request.mask))
+
                     Image(uiImage: request.image)
                         .resizable()
                         .scaledToFit()
                         .task {
-                            //Mimicks picking an image.
-                            if request.image.pngData() == nil{
-                                request.image = try! MaskEditParentView.sample(size: request.size).copy()
+                            // Mimicks picking an image.
+                            if request.image.pngData() == nil,
+                               let image = try? MaskEditParentView.sample(size: request.size).copy() {
+                                request.image = image
                             }
                         }
-                    
+
                     ImageEditButtonView(request: request, response: $response)
                         .buttonStyle(.borderedProminent)
                         .disabled(request.prompt.isEmpty || request.mask == nil)
-                    VStack(alignment: .leading){
-                        if request.prompt.isEmpty{
-                            Text("Add a prompt")
+                    VStack(alignment: .leading) {
+                        if request.prompt.isEmpty {
+                            Text(.getString(.addPrompt))
                         }
-                        if request.mask == nil{
-                            Text("Add a mask with a transparent area.")
+                        if request.mask == nil {
+                            Text(.getString(.addMaskWithTransparentArea))
                         }
                     }.font(.caption)
                         .foregroundColor(.red)
-                    
+
                 }
                 .id(requestNamespace)
-                Section("Response") {
-                    if let image = response?.data.first?.image{
+                Section(.getString(.response)) {
+                    if let image = response?.data.first?.image {
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFit()
-                        CatchingButton(titleKey: "Add Image to Request") {
+                        CatchingButton(titleKey: .getString(.addImageToRequest)) {
                             request.image = try image.copy()
                             request.mask = nil
                         }
-                    }else{
-                        Text("Edit Image and submit Response")
+                    } else {
+                        Text(.getString(.editImageAndSubmitRequest))
                     }
                 }
                 .id(responseNamespace)
-                .onChange(of: response) { newValue in
+                .onChange(of: response) { _ in
                     proxy.scrollTo(responseNamespace)
                 }
             }
@@ -71,7 +73,7 @@ public struct ImageEditWithMaskSampleView: View {
 @available(iOS 15.0, *)
 struct ImageEditWithMaskSampleView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView{
+        NavigationView {
             ImageEditWithMaskSampleView()
         }
     }

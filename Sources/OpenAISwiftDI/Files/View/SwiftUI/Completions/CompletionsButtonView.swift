@@ -9,7 +9,7 @@ import SwiftUI
 
 @available(macOS 12.0, *)
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/completions
+/// https://platform.openai.com/docs/api-reference/completions
 public struct CompletionsButtonView: View {
     let request: CompletionsRequest
     @Binding var response: CompletionsResponse?
@@ -19,7 +19,7 @@ public struct CompletionsButtonView: View {
         self._response = response
     }
     public var body: some View {
-        CatchingButton(titleKey: "Submit") {
+        CatchingButton(titleKey: .getString(.submit)) {
             response = try await manager.makeCompletionsCall(parameters: request)
         }
     }

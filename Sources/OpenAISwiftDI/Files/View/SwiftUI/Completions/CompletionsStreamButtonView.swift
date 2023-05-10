@@ -9,28 +9,28 @@ import SwiftUI
 
 @available(macOS 12.0, *)
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/completions
+/// https://platform.openai.com/docs/api-reference/completions
 struct CompletionsStreamButtonView: View {
     @Binding var request: CompletionsRequest
     @Binding var response: CompletionsResponse?
     @Injected(\.openAICompletionsMgr) private var manager
 
     var body: some View {
-        CatchingButton(titleKey: "Stream") {
+        CatchingButton(titleKey: .getString(.stream)) {
             response = nil
             let stream = try await manager.makeCompletionsCallStream(parameters: request)
             for try await response in stream {
-                if self.response == nil{
+                if self.response == nil {
                     self.response = response
-                }else {
-                    for c in response.choices{
-                        //merge
-                        if let idx = self.response?.choices.firstIndex(where: { n in
-                            n.id == c.id
-                        }){
-                            self.response?.choices[idx].text.append(c.text)
-                        }else { //append
-                            self.response?.choices.append(c)
+                } else {
+                    for choice in response.choices {
+                        // merge
+                        if let idx = self.response?.choices.firstIndex(where: { innerChoice in
+                            innerChoice.id == choice.id
+                        }) {
+                            self.response?.choices[idx].text.append(choice.text)
+                        } else { // append
+                            self.response?.choices.append(choice)
                         }
                     }
                 }

@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - CompletionsResponse
-///https://platform.openai.com/docs/api-reference/completions
+/// https://platform.openai.com/docs/api-reference/completions
 public struct CompletionsResponse: Codable, Equatable, Hashable, Identifiable, Sendable {
     public let id: String
     public var object: String
@@ -17,36 +17,33 @@ public struct CompletionsResponse: Codable, Equatable, Hashable, Identifiable, S
     public var choices: [Choice]
     public var usage: Usage?
     public var parameters: CompletionsRequest?
-    
     public mutating func merge(_ obj: Self) {
-        
-        guard obj.id == id else{
+        guard obj.id == id else {
             return
         }
         created = obj.created
         object = obj.object
         model = obj.model
         usage = obj.usage
-        for c in obj.choices{
+        for choice in obj.choices {
             if let idx = choices.firstIndex(where: { choice in
-                choice.index == c.index
-            }){
-                choices[idx].text.append(c.text)
-            }else{
-                choices.append(c)
+                choice.index == choice.index
+            }) {
+                choices[idx].text.append(choice.text)
+            } else {
+                choices.append(choice)
             }
         }
     }
-    
 }
-extension Array where Element == CompletionsResponse{
-    public mutating func merge(_ obj: Element) -> Int{
-        if let index = self.firstIndex(where: { r in
-            r.id == obj.id
-        }){
+extension Array where Element == CompletionsResponse {
+    public mutating func merge(_ obj: Element) -> Int {
+        if let index = self.firstIndex(where: { response in
+            response.id == obj.id
+        }) {
             self[index].merge(obj)
             return index
-        }else{
+        } else {
             self.append(obj)
             return self.indices.last!
         }
@@ -54,7 +51,7 @@ extension Array where Element == CompletionsResponse{
 }
 // MARK: - Choice
 public struct Choice: Codable, Equatable, Hashable, Identifiable, Sendable {
-    public var id: Int{
+    public var id: Int {
         index
     }
     public var text: String
@@ -78,49 +75,52 @@ public struct Usage: Codable, Equatable, Hashable, Sendable {
         case completionTokens = "completion_tokens"
         case promptTokens = "prompt_tokens"
     }
-    
-    static func + (lhs: Usage, rhs: Usage) -> Usage{
-        Usage(totalTokens: lhs.totalTokens + rhs.totalTokens, completionTokens: lhs.completionTokens + rhs.completionTokens, promptTokens: lhs.promptTokens + rhs.promptTokens)
+
+    static func + (lhs: Usage, rhs: Usage) -> Usage {
+        Usage(totalTokens: lhs.totalTokens + rhs.totalTokens,
+              completionTokens: lhs.completionTokens + rhs.completionTokens,
+              promptTokens: lhs.promptTokens + rhs.promptTokens)
     }
 }
-extension Optional<Usage>{
-    static func + (lhs: Usage?, rhs: Usage?) -> Usage{
+extension Optional<Usage> {
+    static func + (lhs: Usage?, rhs: Usage?) -> Usage {
         let lhs = lhs ?? .init(totalTokens: 0, completionTokens: 0, promptTokens: 0)
         let rhs = rhs ?? .init(totalTokens: 0, completionTokens: 0, promptTokens: 0)
         return lhs + rhs
     }
+    static func += (lhs: Usage?, rhs: Usage?) -> Usage {
+         lhs + rhs
+    }
 }
 
-protocol RawCodable: Codable, RawRepresentable where RawValue == String{
-    
+protocol RawCodable: Codable, RawRepresentable where RawValue == String {
 }
 
-extension RawCodable{
-    public var rawValue: RawValue{
+extension RawCodable {
+    public var rawValue: RawValue {
         let encoder = JSONEncoder()
-        do{
+        do {
             let string = try encoder.encode(self)
             return String(data: string, encoding: .utf8) ?? ""
-        }catch{
+        } catch {
             print(error)
             return error.localizedDescription
         }
-        
     }
     public init?(rawValue: RawValue) {
         guard let data = rawValue.data(using: .utf8) else {
             return nil
         }
         let decoder = JSONDecoder()
-        do{
+        do {
             self = try decoder.decode(Self.self, from: data)
-        }catch{
+        } catch {
             print(error)
             return nil
         }
     }
 }
-//Allows all Codable Arrays to be saved using AppStorage
+// Allows all Codable Arrays to be saved using AppStorage
 extension Array: RawRepresentable where Element: Codable {
     public init?(rawValue: String) {
         guard let data = rawValue.data(using: .utf8),
@@ -130,7 +130,6 @@ extension Array: RawRepresentable where Element: Codable {
         }
         self = result
     }
-    
     public var rawValue: String {
         guard let data = try? JSONEncoder().encode(self),
               let result = String(data: data, encoding: .utf8)
@@ -140,4 +139,3 @@ extension Array: RawRepresentable where Element: Codable {
         return result
     }
 }
-

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public enum OpenAIEndpoints: String{
+public enum OpenAIEndpoints: String {
     case completions = "/v1/completions"
     case imagesGenerations = "/v1/images/generations"
     case imagesEdits = "/v1/images/edits"

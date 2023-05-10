@@ -1,6 +1,7 @@
-# OpenAISwiftDI
+# **OpenAISwiftDI
 
 OpenAI + Swift + Dependecy Injection
+
 
 OpenAISwiftDI is a Swift is a community maintained package to communicate with [OpenAI API](https://platform.openai.com/docs/introduction) this package will use Dependecy Injection to facilitate development of a client-side application while waiting for a server-side environment.
 
@@ -10,16 +11,17 @@ The `Package` includes a `URLSession` based `Provider` that serves as a starting
 
 The package's `Request` models all have a `validate()` that is capable of doing basic checks of the models before sending them to the provider.
 
-**Setup**
+##**Setup
 
 Add the dependency.
 
 ```swift
-.package(url: "https://github.com/vedlai/OpenAISwiftDI", from: "1.0.0")
+.package(url: "https://github.com/vedlai/OpenAISwiftDI", from: "1.0.2")
 ```
-**Getting Started**
+##**Getting Started
 
 Import the package.
+
 ```swift
 import OpenAIDI
 ```
@@ -29,14 +31,14 @@ Inject a provider as soon as possible.
 ```swift
 let key: String = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]!
 
-let org: String = ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION"]
+let org: String? = ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION"]
 
 InjectedValues[\.openAIProvider] = URLSessionOpenAIProvider(apiKey: key, orgId: org)
 ```
 
 If you don't inject a `Provider` the app will use `MockOpenAIProvider`. This provider generates sample responses. The intent behind this is to have something that behaves as if it is working but everything is hardcoded. It is ideal for `Previews` where quick (Free) responses are needed when creating the User Interface.
 
-Then access the provider using the `@Injected` property wrapper.
+You can access the current provider using the `@Injected` property wrapper.
 
 ```swift
 @Injected(\.openAIProvider) var openAIProvider
@@ -50,17 +52,21 @@ or access one of the Manager's with built in checks such as verifiying propertie
 @Injected(\.openAICompletionsMgr) var openAICompletionsMgr
 ```
 
-**Available Sample Views**
+##**Available Methods
 
-**Chat Completions**
+See [OpenAIProviderProtocol](/Sources/OpenAISwiftDI/Files/Model/Service/OpenAIProvider/OpenAIProviderProtocol.swift)
+
+##**Sample Views
+
+***Chat Completions***
 
 [ChatCompletionsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Chat.png)
     
-**Completions**
+***Completions***
 
 [CompletionsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Completions.png)
 
-**Images**
+***Images***
 
 [ImageCreateSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageCreate.png)
 
@@ -68,11 +74,11 @@ or access one of the Manager's with built in checks such as verifiying propertie
 
 [ImageVariationSampleView](/Sources/OpenAISwiftDI/Showcase/Images/ImageVariation.png)
 
-**Edits**
+***Edits***
 
 [EditsSampleView](/Sources/OpenAISwiftDI/Showcase/Images/Edits.png)
 
-**Supported Endpoints**
+##**Supported Endpoints
 
 ```swift
 public enum OpenAIEndpoints: String{
@@ -87,19 +93,19 @@ public enum OpenAIEndpoints: String{
 ```
 More to come...
 
-**Contribute**
+##**Contribute
 
 Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues](https://github.com/vedlai/OpenAISwiftDI/issues).
 
-**Known Limitations**
+##**Known Limitations
 
-Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. Might adjust in the future.
+1. Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. 
 
-When using `URLSessionOpenAIProvider`, Completions and Chat Completions streams are limited to iOS 15+ and macOS 12+.
+2. When using `URLSessionOpenAIProvider`, Completions and Chat Completions Streams are limited to iOS 15+ and macOS 12+.
 
-Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task` & `.textSelection(.enabled)`, their purpose is to be quick prototypes that demostrate functionality.
+3. Sample `View`s are limited to iOS 15+ and macOS 12+ because of `.task` & `.textSelection(.enabled)`, their purpose is to be quick prototypes that demostrate functionality.
 
-**License**
+##**License
 
 MIT License
 

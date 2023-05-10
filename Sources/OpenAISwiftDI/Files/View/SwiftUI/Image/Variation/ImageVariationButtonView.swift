@@ -8,7 +8,7 @@
 import SwiftUI
 
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/images/create-variation
+/// https://platform.openai.com/docs/api-reference/images/create-variation
 public struct ImageVariationButtonView: View {
     let request: ImageVariationRequestModel
     @Binding var response: ImageResponseModel?
@@ -19,12 +19,12 @@ public struct ImageVariationButtonView: View {
         self._response = response
     }
     public var body: some View {
-        ZStack{
-            CatchingButton(titleKey: "Create variation") {
+        ZStack {
+            CatchingButton(titleKey: .getString(.createVariation)) {
                 let stream  = await manager.generateImageVariation(request: request, type: ImageResponseModel.self)
-                
-                for try await step in stream{
-                    switch step{
+
+                for try await step in stream {
+                    switch step {
                     case .image(let image):
                         response = image
                     case .progress(let progress):
@@ -33,8 +33,8 @@ public struct ImageVariationButtonView: View {
                 }
                 progressLabel = ""
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            if !progressLabel.isEmpty{
-                ZStack{
+            if !progressLabel.isEmpty {
+                ZStack {
                     Color.white.opacity(0.8)
                     ProgressView {
                         Text(progressLabel)
@@ -48,7 +48,7 @@ public struct ImageVariationButtonView: View {
 @available(iOS 15.0, *)
 struct ImageVariationButtonView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageVariationButtonView(request: .init(image: .checkmark, n: 1, size: .large), response: .constant(nil))
+        ImageVariationButtonView(request: .init(image: .checkmark, number: 1, size: .large), response: .constant(nil))
     }
 }
 #endif

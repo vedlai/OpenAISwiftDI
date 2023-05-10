@@ -57,40 +57,40 @@ final class ChatCompletionRequestTest: XCTestCase {
         new.temperature = 1 //Pass range 0...2
         try new.validate()
         
-        new.top_p = 1 //Fail both temp and top set
+        new.topP = 1 //Fail both temp and top set
         XCTAssertThrowsError(try new.validate())
         
         new.temperature = nil //Pass
         try new.validate()
         
-        new.presence_penalty = -2.1 //Fail
+        new.presencePenalty = -2.1 //Fail
         XCTAssertThrowsError(try new.validate())
         
-        new.presence_penalty = 2.1 //Fail
+        new.presencePenalty = 2.1 //Fail
         XCTAssertThrowsError(try new.validate())
         
-        new.presence_penalty = -2 //Pass
+        new.presencePenalty = -2 //Pass
         try new.validate()
 
-        new.presence_penalty = 2 //Pass
+        new.presencePenalty = 2 //Pass
         try new.validate()
         
-        new.presence_penalty = 1 //Pass
+        new.presencePenalty = 1 //Pass
         try new.validate()
         //frequency_penalty
-        new.frequency_penalty = -2.1 //Fail
+        new.frequencyPenalty = -2.1 //Fail
         XCTAssertThrowsError(try new.validate())
         
-        new.frequency_penalty = 2.1 //Fail
+        new.frequencyPenalty = 2.1 //Fail
         XCTAssertThrowsError(try new.validate())
         
-        new.frequency_penalty = -2 //Pass
+        new.frequencyPenalty = -2 //Pass
         try new.validate()
 
-        new.frequency_penalty = 2 //Pass
+        new.frequencyPenalty = 2 //Pass
         try new.validate()
         
-        new.frequency_penalty = 1 //Pass
+        new.frequencyPenalty = 1 //Pass
         try new.validate()
     }
 

@@ -6,29 +6,41 @@
 //
 
 import Foundation
-///https://platform.openai.com/docs/api-reference/edits/create
-public struct EditRequest: Codable{
+/// https://platform.openai.com/docs/api-reference/edits/create
+public struct EditRequest: Codable {
     public var model: EditModels = .textDavinciEdit001
     public var input: String?
     public var instruction: String
     public var temperature: Double?
-    public var top_p: Double?
-    
-    public func validate() throws{
-        guard (temperature == nil && top_p == nil) || (temperature != nil && top_p == nil) || (temperature == nil && top_p != nil) else{
-            throw PackageErrors.custom("use temperature or top_p but not both")
+    public var topP: Double?
+
+    public func validate() throws {
+        guard (temperature == nil && topP == nil) ||
+                (temperature != nil && topP == nil) ||
+                (temperature == nil && topP != nil) else {
+            throw PackageErrors.useTemperatureOrTopPButNotBoth
         }
-        //temp
-        if let temp = temperature, !(0...2).contains(temp){
-            throw PackageErrors.custom("temperature should be between 0...2")
+        let tempRange = 0.0...2.0
+        // temp
+        if let temp = temperature, !(tempRange).contains(temp) {
+            throw PackageErrors.temperatureShouldBeBetween(tempRange)
         }
-        if let top_p = top_p, !(0...1).contains(top_p){
-            throw PackageErrors.custom("top_p should be between 1 & 0")
+        let topPRange = 0.0...1.0
+
+        if let topP = topP, !(topPRange).contains(topP) {
+            throw PackageErrors.topPShouldBeBetween(topPRange)
         }
     }
-    public enum EditModels: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
+    public enum EditModels: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
         case textDavinciEdit001 = "text-davinci-edit-001"
         case codeDavinciEdit001 = "code-davinci-edit-001"
 
+    }
+    enum CodingKeys: String, CodingKey {
+        case model
+        case input
+        case instruction
+        case temperature
+        case topP = "top_p"
     }
 }

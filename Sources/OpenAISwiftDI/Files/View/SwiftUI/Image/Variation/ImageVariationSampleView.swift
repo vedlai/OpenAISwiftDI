@@ -8,32 +8,33 @@
 import SwiftUI
 
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/images/create-variation
+/// https://platform.openai.com/docs/api-reference/images/create-variation
 public struct ImageVariationSampleView: View {
-    @State private var request: ImageVariationRequestModel = .init(image: .init(), n: 1, size: .medium)
+    @State private var request: ImageVariationRequestModel = .init(image: .init(), number: 1, size: .medium)
     @State private var response: ImageResponseModel?
-    public init(){}
+    public init() { }
     public var body: some View {
-        Form{
-            Section("request") {
-                if request.image.pngData() == nil{ //Check to create a sample - this mimicks picking an image.
-                    ImageCreateButtonView(request: .init(prompt: "generate sample", size: request.size), response: $response)
-                        
-                }else{
+        Form {
+            Section(.getString(.request)) {
+                if request.image.pngData() == nil { // Check to create a sample - this mimicks picking an image.
+                    ImageCreateButtonView(request: .init(prompt: .generateSample, size: request.size),
+                                          response: $response)
+
+                } else {
                     ImageVariationButtonView(request: request, response: $response)
                 }
             }
-            Section("Response") {
-                if let image = response?.data.first?.image{
+            Section(.getString(.response)) {
+                if let image = response?.data.first?.image {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
-                }else{
-                    Text("Press submit to generate sample")
+                } else {
+                    Text(.getString(.pressSubmitToGenerateSample))
                 }
             }.onChange(of: response) { newValue in
-                //Pass the new image to the request.
-                if let new = newValue?.data.first?.image{
+                // Pass the new image to the request.
+                if let new = newValue?.data.first?.image {
                     request.image = new
                 }
             }

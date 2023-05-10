@@ -8,27 +8,27 @@
 import SwiftUI
 
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/images/create
+/// https://platform.openai.com/docs/api-reference/images/create
 public struct ImageCreateSampleView: View {
     @State private var request: ImageCreateRequestModel = .init(prompt: "")
     @State private var response: ImageResponseModel?
     public init() {}
     public var body: some View {
-        Form{
-            Section("Request") {
-                TextField("Enter prompt here", text: $request.prompt)
+        Form {
+            Section(.getString(.request)) {
+                TextField(.getString(.enterPromptHere), text: $request.prompt)
                     .textFieldStyle(.roundedBorder)
                 ImageSizePicker(size: $request.size)
                 ImageCreateButtonView(request: request, response: $response)
                     .buttonStyle(.borderedProminent)
             }
-            Section("Response") {
-                if let response = response, let image = response.data.first?.image{
+            Section(.getString(.response)) {
+                if let response = response, let image = response.data.first?.image {
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFit()
-                }else{
-                    Text("Create prompt and generate a request.")
+                } else {
+                    Text(.getString(.enterPromptAndGenerateImage))
                 }
             }
         }

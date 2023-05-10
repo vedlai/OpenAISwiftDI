@@ -7,8 +7,8 @@
 
 import Foundation
 extension CGSize {
-    ///Height/Width
-    var aspectRatio: CGFloat{
+    /// Height/Width
+    var aspectRatio: CGFloat {
         self.height/self.width
     }
 }

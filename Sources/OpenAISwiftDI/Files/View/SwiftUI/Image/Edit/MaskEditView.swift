@@ -9,16 +9,16 @@ import SwiftUI
 @available(iOS 15.0, *)
 public struct MaskEditParentView: View {
     public static func sample (size: ImageSize) -> UIImage {
-        ZStack{
+        ZStack {
             Color.red
-            Text("Sample")
+            Text(verbatim: .sample)
         }
         .frame(width: size.size, height: size.size)
             .snapshot()
     }
     @State private var image: UIImage = Self.sample(size: .large)
     @State private var mask: UIImage?
-    public var body: some View{
+    public var body: some View {
         MaskEditView(image: image, mask: $mask)
     }
 }
@@ -28,17 +28,17 @@ public struct MaskEditView: View {
     @Binding var mask: UIImage?
     @State private var size: CGSize = .zero
     @State private var loc: CGPoint = .zero
-    var dragGesture: some Gesture{
+    var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
                 let touchLocation = value.location
-                let x = image.size.width / size.width
-                let y = image.size.height / size.height
-                
-                let locationInImageView = CGPoint(x: touchLocation.x * x, y: touchLocation.y * y)
+                let xPoint = image.size.width / size.width
+                let yPoint = image.size.height / size.height
+
+                let locationInImageView = CGPoint(x: touchLocation.x * xPoint, y: touchLocation.y * yPoint)
 
                 mask = mask?.processPixels(location: locationInImageView)
-                
+
                 loc = touchLocation
             }
     }
@@ -49,33 +49,33 @@ public struct MaskEditView: View {
     @State private var showOriginal: Bool = false
 
     public var body: some View {
-        VStack{
-            Text(loc.debugDescription).hidden() //Only here to trigger view updayes
-            Text("Tap image to create a transparent area.")
-            ZStack{
+        VStack {
+            Text(loc.debugDescription).hidden() // Only here to trigger view updayes
+            Text(verbatim: .tapImageToCreateTransparentArea)
+            ZStack {
                 Color.gray
-                if let m = mask{
-                    imageView(m)
-                        .gesture(dragGesture,including: showOriginal ? .none : .gesture)
-                }else{
+                if let mask = mask {
+                    imageView(mask)
+                        .gesture(dragGesture,
+                                 including: showOriginal ? .none : .gesture)
+                } else {
                     ProgressView()
-                        .task{
+                        .task {
                             await setMask()
                         }
                 }
             }
-            .scaledToFit() 
+            .scaledToFit()
 
-            CatchingButton(titleKey: "Reset") {
+            CatchingButton(titleKey: .getString(.reset)) {
                 await setMask()
             }
-                
         }
     }
-    
-    func imageView(_ i:UIImage) -> some View{
-        GeometryReader{ geo in
-            SwiftUI.Image(uiImage: i)
+
+    func imageView(_ image: UIImage) -> some View {
+        GeometryReader { geo in
+            SwiftUI.Image(uiImage: image)
                 .resizable()
                 .task(id: geo.size) {
                     size = geo.size
@@ -83,13 +83,13 @@ public struct MaskEditView: View {
         }
     }
     func setMask() async {
-        do{
+        do {
             self.mask = try image.copy()
-        }catch{
+        } catch {
             print(error)
         }
     }
-} 
+}
 
 @available(iOS 15.0, *)
 struct MaskEditView_Previews: PreviewProvider {

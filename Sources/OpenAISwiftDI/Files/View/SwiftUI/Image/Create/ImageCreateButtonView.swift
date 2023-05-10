@@ -8,18 +8,18 @@
 import SwiftUI
 #if canImport(UIKit)
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/images/create
+/// https://platform.openai.com/docs/api-reference/images/create
 public struct ImageCreateButtonView: View {
     let request: ImageCreateRequestModel
     @Binding var response: ImageResponseModel?
     @Injected(\.openAIImageMgr) private var manager
-    
+
     init(request: ImageCreateRequestModel, response: Binding<ImageResponseModel?> ) {
         self.request = request
         self._response = response
     }
     public var body: some View {
-        CatchingButton(titleKey: "Generate") {
+        CatchingButton(titleKey: .getString(.generate)) {
             response = try await manager.generateImage(request: request)
         }
     }

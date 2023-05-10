@@ -7,40 +7,47 @@
 #if canImport(UIKit)
 import Foundation
 import UIKit
-//https://platform.openai.com/docs/api-reference/images/create-variation
-public struct ImageVariationRequestModel: Sendable{
+// https://platform.openai.com/docs/api-reference/images/create-variation
+public struct ImageVariationRequestModel: Sendable {
     public var image: UIImage
-    public var n: Int
+    public var number: Int
     public var size: ImageSize
-    var response_format: ImageResponseFormat
+    var responseFormat: ImageResponseFormat
     public var user: String?
-    
-    public init(image: UIImage, n: Int, size: ImageSize, user: String? = nil) {
+
+    public init(image: UIImage, number: Int, size: ImageSize, user: String? = nil) {
         self.image = image
-        self.n = n
+        self.number = number
         self.size = size
-        self.response_format = .url
+        self.responseFormat = .url
         self.user = user
     }
-    
+
     public func validate() throws {
-        let maxBytes = 40000000
+        let maxMB = Measurement(value: 4, unit: UnitInformationStorage.megabytes)
+        let maxBytes = maxMB.converted(to: .bytes).value
 
         guard let data = image.pngData() else {
-            throw PackageErrors.custom("Image must be a valid PNG file.")
+            throw PackageErrors.imageMustBeValidPng
         }
-        guard  data.count < maxBytes else {
-            throw PackageErrors.custom("Image size should not exceed 4MB.")
+        guard  Double(data.count) < maxBytes else {
+            throw PackageErrors.imageSizeShouldNotExceed(maxMB)
         }
         let ratio = image.size.aspectRatio
-        
+
         guard ratio == 1 else {
-            throw PackageErrors.custom("Image must be a square.")
+            throw PackageErrors.imageMustBeSquare
         }
-        
-        guard (0...10).contains(n) else{
-            throw PackageErrors.custom("n must be between 1 and 10.")
+        let numberRange = 0.0...10.0
+        guard (numberRange).contains(Double(number)) else {
+            throw PackageErrors.number(numberRange)
         }
+    }
+    enum CodingKeys: String, CodingKey {
+        case image
+        case number = "n"
+        case size
+        case responseFormat = "response_format"
     }
 }
 #endif

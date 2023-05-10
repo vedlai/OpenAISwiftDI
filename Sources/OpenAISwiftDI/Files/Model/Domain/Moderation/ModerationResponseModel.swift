@@ -11,21 +11,22 @@ public struct ModerationResponseModel: Codable, Sendable {
     public let id, model: String
     public let results: [OAIModModelResult]
     public var prompt: String?
-    public func check() throws -> Self{
+    public func check() throws -> Self {
         guard self.results.allSatisfy({ result in
             result.flagged == false
         }) else {
-            let fs = self.results.map { res in
+            let flaggedString = self.results.map { res in
                 res.categories.flaggedDescription
             }.joined(separator: ", ")
-            throw ModerationError.flag("\(prompt?.capitalized ?? "Prompt") was flagged as \(fs). Rephrase your prompt!")
+            throw ModerationError
+                .flag("\(prompt?.capitalized ?? "Prompt") was flagged as \(flaggedString). Rephrase your prompt!")
         }
         return self
     }
-    public enum ModerationError: LocalizedError{
+    public enum ModerationError: LocalizedError {
         case flag(String)
-        public var errorDescription: String?{
-            switch self{
+        public var errorDescription: String? {
+            switch self {
             case .flag(let string):
                 return string
             }
@@ -49,28 +50,28 @@ public struct OAIModModelResult: Codable, Sendable {
 public struct OAIModCategoriesModel: Codable, Sendable {
     public let sexual, hate, violence, selfHarm: Bool
     public let sexualMinors, hateThreatening, violenceGraphic: Bool
-    ///Returns a String with all the variables that are marked `true`
-    public var flaggedDescription: String{
+    /// Returns a String with all the variables that are marked `true`
+    public var flaggedDescription: String {
         let mirror = Mirror(reflecting: self)
         return mirror.children.filter { child in
             (child.value as? Bool) == true
-        }.compactMap { (key, value) in
+        }.compactMap { (key, _) in
             if key == "selfHarm"{
                 return key?.camelCaseToWords(separator: "-")
-            }else{
+            } else {
                 return key?.camelCaseToWords(separator: "/")
             }
         }.joined(separator: ", ")
     }
-    ///Returns a String with all the variables that are marjed `false`
-    public var acceptableDescription: String{
+    /// Returns a String with all the variables that are marjed `false`
+    public var acceptableDescription: String {
         let mirror = Mirror(reflecting: self)
         return mirror.children.filter { child in
             (child.value as? Bool) == false
-        }.compactMap { (key, value) in
+        }.compactMap { (key, _) in
             if key == "selfHarm"{
                 return key?.camelCaseToWords(separator: "-")
-            }else{
+            } else {
                 return key?.camelCaseToWords(separator: "/")
             }
         }.joined(separator: ", ")
@@ -97,7 +98,7 @@ public struct OAIModCategoryScoresModel: Codable, Sendable {
         case violenceGraphic = "violence/graphic"
     }
 }
-public enum ModerationModels: String, Codable, Equatable, Hashable, Sendable, CaseIterable{
+public enum ModerationModels: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
     case textModerationStable = "text-moderation-stable"
     case textModerationLatest = "text-moderation-latest"
 }

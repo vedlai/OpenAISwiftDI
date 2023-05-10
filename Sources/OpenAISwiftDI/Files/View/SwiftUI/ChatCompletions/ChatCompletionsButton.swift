@@ -9,38 +9,57 @@ import SwiftUI
 
 @available(macOS 12.0, *)
 @available(iOS 15.0, *)
-///https://platform.openai.com/docs/api-reference/chat
+/// https://platform.openai.com/docs/api-reference/chat
 public struct ChatCompletionsButton: View {
     @Binding var latestMessage: ChatMessage
     @Binding var request: ChatCompletionRequest
     @Binding var responses: [ChatCompletionsResponse]
     @Injected(\.openAICompletionsMgr) private var manager
-
-    public init(latestMessage: Binding<ChatMessage>, request: Binding<ChatCompletionRequest>, responses: Binding<[ChatCompletionsResponse]>) {
+    public init(latestMessage: Binding<ChatMessage>,
+                request: Binding<ChatCompletionRequest>,
+                responses: Binding<[ChatCompletionsResponse]>) {
         self._latestMessage = latestMessage
         self._request = request
         self._responses = responses
     }
     public var body: some View {
-        CatchingButton(titleKey: "Submit") {
-            do{
-                responses.append(.init(id: UUID().uuidString, object: "user created", created: Date(), model: request.model, choices: [.init(index: 0, message: latestMessage, finish_reason: "stop")]))
-                
+        CatchingButton(label: {
+                Text(.getString(.submit))
+        }, action: {
+            do {
+                responses
+                    .append(.init(id: UUID().uuidString,
+                                  object: "user.created",
+                                  created: Date(),
+                                  model: request.model,
+                                  choices: [.init(index: 0, message: latestMessage, finishReason: "stop")]
+                                 )
+                    )
+
                 request.messages = responses.messages
 
-                let response = try await manager.makeChatCompletionsCall(parameters: request, latestMessage: latestMessage)
-                
+                let response = try await manager
+                    .makeChatCompletionsCall(parameters: request,
+                                             latestMessage: latestMessage)
+
                 latestMessage = .init(content: "")
-                
                 responses.mergeChunks(newResponse: response)
-                //responses append
-            }catch{
-                responses.append(.init(id: UUID().uuidString, object: "error caught", created: Date(), model: request.model, choices: [.init(index: 0, message: .init(role: .system,content: error.localizedDescription), finish_reason: "stop")]))
+
+            } catch {
+                responses
+                    .append(.init(id: UUID().uuidString,
+                                  object: "error",
+                                  created: Date(),
+                                  model: request.model,
+                                  choices: [.init(index: 0,
+                                                  message: .init(role: .system,
+                                                                 content: error.localizedDescription),
+                                                  finishReason: "stop")]))
 
                 throw error
             }
-            request.messages = []            
-        }
+                request.messages = []
+        })
     }
 }
 
@@ -48,6 +67,8 @@ public struct ChatCompletionsButton: View {
 @available(iOS 15.0, *)
 struct ChatCompletionsButton_Previews: PreviewProvider {
     static var previews: some View {
-        ChatCompletionsButton(latestMessage: .constant(.init(content: "")), request: .constant(.init()), responses: .constant([]))
+        ChatCompletionsButton(latestMessage: .constant(.init(content: "")),
+                              request: .constant(.init()),
+                              responses: .constant([]))
     }
 }
