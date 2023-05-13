@@ -7,7 +7,7 @@
 
 import Foundation
 /// https://platform.openai.com/docs/api-reference/edits/create
-public struct EditRequest: Codable {
+public struct EditRequest: Codable, Sendable, Hashable, Equatable {
     public var model: EditModels = .textDavinciEdit001
     public var input: String?
     public var instruction: String

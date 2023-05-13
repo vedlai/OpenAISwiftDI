@@ -7,14 +7,14 @@
 
 import Foundation
 // MARK: - OpenAIErrorResponse
-public struct OpenAIErrorResponse: Codable, Sendable {
-    let error: OpenAIError
+public struct OpenAIErrorResponse: Codable, Sendable, Hashable, Equatable {
+    public let error: OpenAIError
 }
 
 // MARK: - OpenAIError
-public struct OpenAIError: Codable, LocalizedError, Sendable {
-    let message, type: String
-    let param, code: String?
+public struct OpenAIError: Codable, LocalizedError, Sendable, Hashable, Equatable {
+    public let message, type: String
+    public let param, code: String?
 
     public var errorDescription: String? {
         var errorMessage = ""
