@@ -2,7 +2,6 @@
 
 OpenAI + Swift + Dependecy Injection 
 
-
 OpenAISwiftDI is a Swift is a community maintained package to communicate with [OpenAI API](https://platform.openai.com/docs/introduction) this package will use Dependecy Injection to facilitate development of a client-side application while waiting for a server-side environment.
 
 ⚠️ OpenAI advises that the API key is not included in client-side applications, requests should be processed through a backend service. 
