@@ -36,11 +36,4 @@ public struct EditRequest: Codable {
         case codeDavinciEdit001 = "code-davinci-edit-001"
 
     }
-    enum CodingKeys: String, CodingKey {
-        case model
-        case input
-        case instruction
-        case temperature
-        case topP = "top_p"
-    }
 }

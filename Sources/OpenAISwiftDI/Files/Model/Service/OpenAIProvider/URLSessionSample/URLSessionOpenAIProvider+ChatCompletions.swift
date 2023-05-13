@@ -15,14 +15,6 @@ extension URLSessionOpenAIProvider {
 
         return try await makeCall(parameters, endpoint: .chatCompletions)
     }
-    public func makeChatCompletionsCall2(parameters: ChatCompletionRequest) throws ->
-    AsyncThrowingStream<DecodedResponse<ChatCompletionsResponse>, Error> {
-        var parameters = parameters
-
-        parameters.stream = false
-
-        return try makeCallWithProgress(parameters, endpoint: .chatCompletions)
-    }
 
     public func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) ->
     AsyncThrowingStream<ChatCompletionsResponse, Error> {
@@ -40,13 +32,11 @@ extension URLSessionOpenAIProvider {
 
                     var request = getBasicRequest(url: url)
 
-                    let encoder = JSONEncoder()
-
                     let json = try encoder.encode(parameters)
 
                     request.httpBody = json
 
-                    guard #available(iOS 15.0, *), #available(macOS 12.0, *) else {
+                    guard #available(iOS 15.0, *), #available(macOS 12.0, *), #available(watchOS 8.0, *) else {
                         throw PackageErrors.streamingIsNotSupportedForThisOS
                     }
                     let (bytes, response) = try await urlSession.bytes(for: request)
@@ -82,7 +72,18 @@ extension URLSessionOpenAIProvider {
             }
         }
     }
+}
 
+extension URLSessionOpenAIProvider {
+    // MARK: With Progress - not working as expected because as of 11 May 2023 OpenAI does not provide progress updates.
+    public func makeChatCompletionsCall2(parameters: ChatCompletionRequest) throws ->
+    AsyncThrowingStream<DecodedResponse<ChatCompletionsResponse>, Error> {
+        var parameters = parameters
+
+        parameters.stream = false
+
+        return try makeCallWithProgress(parameters, endpoint: .chatCompletions)
+    }
     public func makeChatCompletionsCallStream2(parameters: ChatCompletionRequest) ->
     AsyncThrowingStream<DecodedResponse<ChatCompletionsResponse>, Error> {
 
@@ -100,13 +101,11 @@ extension URLSessionOpenAIProvider {
 
                     var request = getBasicRequest(url: url)
 
-                    let encoder = JSONEncoder()
-
                     let json = try encoder.encode(parameters)
 
                     request.httpBody = json
 
-                    guard #available(iOS 15.0, *), #available(macOS 12.0, *) else {
+                    guard #available(iOS 15.0, *), #available(macOS 12.0, *), #available(watchOS 8.0, *) else {
                         throw PackageErrors.streamingIsNotSupportedForThisOS
                     }
                     let (bytes, response) = try await urlSession.bytes(for: request)

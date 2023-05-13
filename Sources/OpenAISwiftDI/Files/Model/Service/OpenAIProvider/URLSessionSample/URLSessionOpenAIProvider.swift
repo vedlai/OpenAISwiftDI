@@ -8,7 +8,7 @@
 import SwiftUI
 /// `URLSession` based provider to be used as a starting point,
 /// not intended for production since it requires that the API key be included Client-Side
-public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
+public actor URLSessionOpenAIProvider: OpenAIProviderProtocol {
 
     /// Contains the scheme and host for OpenAPI
     let urlComponents: URLComponents = {
@@ -17,17 +17,24 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
         comp.host = "api.openai.com"
         return comp
     }()
-
+    public var encoder: JSONEncoder
     private let apiKey: String
     private let orgId: String?
-    let decoder: JSONDecoder
-    let urlSession: URLSession
+    public var decoder: JSONDecoder
+    var urlSession: URLSession
     /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-    public init(apiKey: String, orgId: String?, urlSession: URLSession = .shared, decoder: (() -> JSONDecoder)? = nil) {
+    public init(apiKey: String,
+                orgId: String?,
+                urlSession: URLSession = .shared,
+                decoder: (@Sendable () -> JSONDecoder)? = nil) {
         self.apiKey = apiKey
         self.orgId = orgId
         self.urlSession = urlSession
         self.decoder = decoder?() ?? .init()
+        self.encoder = .init()
+        Task {
+            await prepareEncodeDecode()
+        }
     }
 
     // MARK: Moderation
@@ -94,35 +101,6 @@ public struct URLSessionOpenAIProvider: OpenAIProviderProtocol {
         }
     }
 
-    // MARK: Codable Helpers
-    internal func decode<D>(data: Data) throws -> D where D: Decodable {
-        do {
-            let obj = try decoder.decode(D.self, from: data)
-            return obj
-        } catch {
-            if let error = checkForOpenAIError(data: data) {
-                throw error
-            } else if let string = String(data: data, encoding: .utf8) as? AnyObject {
-                print("🛑 \(type(of: self)) :: \(#function) :: \n\tERROR: \(string)")
-            }
-            throw error
-        }
-
-    }
-
-    internal func encode<E: Encodable>(model: E) throws -> Data {
-        let encoder: JSONEncoder = .init()
-        return try encoder.encode(model)
-    }
-    func checkForOpenAIError(data: Data) -> OpenAIError? {
-        if let openAIError: OpenAIErrorResponse = try? decode(data: data) {
-            return openAIError.error
-        } else if let error: OpenAIError = try? decode(data: data) {
-            return error
-        }
-        return nil
-    }
-
     // MARK: Aux
     enum ProviderErrors: String, LocalizedError {
         case invalidResponseType
@@ -155,7 +133,6 @@ extension URLSessionOpenAIProvider {
 
         var request = getBasicRequest(url: url)
 
-        let encoder = JSONEncoder()
         let json = try encoder.encode(obj)
 
         request.httpBody = json
@@ -166,9 +143,13 @@ extension URLSessionOpenAIProvider {
     internal func makeCall<D>(request: URLRequest) ->
     AsyncThrowingStream<DecodedResponse<D>, Error> where D: Decodable {
         return AsyncThrowingStream { continuation in
-            let task = Task.detached {
-                let stream: AsyncThrowingStream<ResponseStream, Error> = makeCall(request: request)
+            let task = Task.detached { [weak self] in
+                guard let self = self else {
+                    continuation.finish(throwing: PackageErrors.custom("somethingWentWrong"))
+                    return
+                }
 
+                let stream: AsyncThrowingStream<ResponseStream, Error> = await makeCall(request: request)
                 do {
                     for try await step in stream {
                         switch step {
@@ -176,7 +157,7 @@ extension URLSessionOpenAIProvider {
                             continuation.yield(.progress(progress))
                         case .result(let data):
                             do {
-                                let obj: D = try decode(data: data)
+                                let obj: D = try await decode(data: data)
                                 continuation.yield(.result(obj))
                                 continuation.finish()
                             } catch {
@@ -195,16 +176,23 @@ extension URLSessionOpenAIProvider {
     }
     private func makeCall(request: URLRequest) -> AsyncThrowingStream <ResponseStream, Error> {
         return AsyncThrowingStream { continuation in
-            let task = urlSession.dataTask(with: request) { data, response, error in
+            let task = urlSession.dataTask(with: request) { [weak self]  data, response, error in
+
                 if let response = response as? HTTPURLResponse, response.statusCode == 200, let data = data {
                     continuation.yield(.result(data))
                     continuation.finish()
                 } else if let error = error, let data = data {
-                    if let oaierror = checkForOpenAIError(data: data) {
-                        continuation.finish(throwing: oaierror)
-                    } else {
-                        let nsError = error as NSError
-                        continuation.finish(throwing: nsError)
+                    guard let self = self else {
+                        continuation.finish(throwing: error)
+                        return
+                    }
+                    Task {
+                        if let oaierror = await self.checkForOpenAIError(data: data) {
+                            continuation.finish(throwing: oaierror)
+                        } else {
+                            let nsError = error as NSError
+                            continuation.finish(throwing: nsError)
+                        }
                     }
                 } else if let error = error {
                     continuation.finish(throwing: error)
@@ -229,6 +217,39 @@ extension URLSessionOpenAIProvider {
             }
         }
     }
+    // MARK: Codable Helpers
+    /// Call this on init or any time encoder and decoder changes
+    /// This function adds OpenAI required settings such as `dateEncodingStrategy` and `keyEncodingStrategy`
+    internal func prepareEncodeDecode() {
+        self.encoder = Self.encoder(encoder)
+        self.decoder = Self.decoder(decoder)
+    }
+
+    internal func decode<D>(data: Data) throws -> D where D: Decodable {
+        do {
+            let obj = try decoder.decode(D.self, from: data)
+            return obj
+        } catch {
+            if let error = checkForOpenAIError(data: data) {
+                throw error
+            }
+            throw error
+        }
+    }
+
+    internal func encode<E: Encodable>(model: E) throws -> Data {
+        return try encoder.encode(model)
+    }
+    internal func checkForOpenAIError(data: Data) -> OpenAIError? {
+        if let openAIError = try? decoder.decode(OpenAIErrorResponse.self, from: data) {
+            return openAIError.error
+        } else if let error = try? decoder.decode(OpenAIError.self, from: data) {
+            return error
+        } else if let string = String(data: data, encoding: .utf8) as? AnyObject {
+            print("🛑 \(type(of: self)) :: \(#function) :: \n\tERROR: \(string)")
+        }
+        return nil
+    }
 }
 
 extension URLSessionOpenAIProvider {
@@ -248,8 +269,6 @@ extension URLSessionOpenAIProvider {
         let url = comp.url!
 
         var request = getBasicRequest(url: url)
-
-        let encoder = JSONEncoder()
 
         let json = try encoder.encode(obj)
 

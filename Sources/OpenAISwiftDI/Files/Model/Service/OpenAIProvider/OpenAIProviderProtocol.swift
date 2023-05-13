@@ -7,7 +7,7 @@
 
 import SwiftUI
 /// Serves as the interface between iOS and  OpenAI
-public protocol OpenAIProviderProtocol {
+public protocol OpenAIProviderProtocol: AnyActor {
     // MARK: Moderation
 
     /// Classifies if text violates OpenAI's Content Policy
@@ -43,8 +43,8 @@ public protocol OpenAIProviderProtocol {
     /// Given a list of messages describing a conversation, the model will return a response.
     func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse
     /// Given a list of messages describing a conversation, the model will return a response.
-    func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) ->
-    AsyncThrowingStream<ChatCompletionsResponse, Error>
+    func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) async ->
+     AsyncThrowingStream<ChatCompletionsResponse, Error>
 
     // MARK: Edits
 

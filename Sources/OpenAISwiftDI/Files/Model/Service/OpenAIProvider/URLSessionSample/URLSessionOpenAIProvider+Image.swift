@@ -26,7 +26,7 @@ extension URLSessionOpenAIProvider {
             ImageEditRequestUniModel.CodingKeys.prompt.rawValue: request.prompt,
             ImageEditRequestUniModel.CodingKeys.size.rawValue: request.size.rawValue,
             ImageEditRequestUniModel.CodingKeys.number.rawValue: "\(request.number)",
-            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue: request.responseFormat.rawValue,
+            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue.snake_case(): request.responseFormat.rawValue,
             ImageEditRequestUniModel.CodingKeys.user.rawValue: request.user ?? ""
         ]
 
@@ -71,7 +71,7 @@ extension URLSessionOpenAIProvider {
             ImageEditRequestUniModel.CodingKeys.prompt.rawValue: request.prompt,
             ImageEditRequestUniModel.CodingKeys.size.rawValue: request.size.rawValue,
             ImageEditRequestUniModel.CodingKeys.number.rawValue: "\(request.number)",
-            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue: request.responseFormat.rawValue,
+            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue.snake_case(): request.responseFormat.rawValue,
             ImageEditRequestUniModel.CodingKeys.user.rawValue: request.user ?? ""
         ]
 
@@ -101,7 +101,7 @@ extension URLSessionOpenAIProvider {
         let formFields: [String: String] = [
             ImageEditRequestUniModel.CodingKeys.size.rawValue: request.size.rawValue,
             ImageEditRequestUniModel.CodingKeys.number.rawValue: "\(request.number)",
-            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue: request.responseFormat.rawValue,
+            ImageEditRequestUniModel.CodingKeys.responseFormat.rawValue.snake_case(): request.responseFormat.rawValue,
             ImageEditRequestUniModel.CodingKeys.user.rawValue: request.user ?? ""
         ]
 

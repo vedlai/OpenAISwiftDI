@@ -59,11 +59,11 @@ public struct CompletionsRequest: Codable, Equatable, Hashable, Identifiable, Se
         case model, prompt
         case temperature
         case stream, logprobs, stop
-        case maxTokens = "max_tokens"
-        case topP = "top_p"
+        case maxTokens
+        case topP
         case number = "n"
-        case presencePenalty = "presence_penalty"
-        case frequencyPenalty = "frequency_penalty"
+        case presencePenalty
+        case frequencyPenalty
     }
     public enum CompletionsModel: String, Codable, Equatable, Hashable, Sendable, CaseIterable {
         case textDavinci3 = "text-davinci-003"

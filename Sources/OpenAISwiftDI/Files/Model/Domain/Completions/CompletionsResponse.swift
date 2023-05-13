@@ -60,21 +60,10 @@ public struct Choice: Codable, Equatable, Hashable, Identifiable, Sendable {
     public let finishReason: String?
     public let logprobs: String?
 
-    enum CodingKeys: String, CodingKey {
-        case index
-        case finishReason = "finish_reason"
-        case logprobs, text
-    }
 }
 // MARK: - Usage
 public struct Usage: Codable, Equatable, Hashable, Sendable {
     public let totalTokens, completionTokens, promptTokens: Int
-
-    enum CodingKeys: String, CodingKey {
-        case totalTokens = "total_tokens"
-        case completionTokens = "completion_tokens"
-        case promptTokens = "prompt_tokens"
-    }
 
     static func + (lhs: Usage, rhs: Usage) -> Usage {
         Usage(totalTokens: lhs.totalTokens + rhs.totalTokens,

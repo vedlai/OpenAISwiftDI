@@ -39,11 +39,6 @@ public struct OAIModModelResult: Codable, Sendable {
     public let flagged: Bool
     public let categories: OAIModCategoriesModel
     public let categoryScores: OAIModCategoryScoresModel
-
-    enum CodingKeys: String, CodingKey {
-        case flagged, categories
-        case categoryScores = "category_scores"
-    }
 }
 
 // MARK: - Categories

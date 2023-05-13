@@ -69,7 +69,7 @@ public actor OpenAICompletionsManager: InjectionKey {
     AsyncThrowingStream<ChatCompletionsResponse, Error> {
         try parameters.validate()
         _ = try await checkModeration(string: latestMessage.content)
-        return provider.makeChatCompletionsCallStream(parameters: parameters)
+        return await provider.makeChatCompletionsCallStream(parameters: parameters)
     }
 
     /// Validates and makes request
@@ -83,7 +83,7 @@ public actor OpenAICompletionsManager: InjectionKey {
     public func makeChatCompletionsCallStream(parameters: ChatCompletionRequest) async throws ->
     AsyncThrowingStream<ChatCompletionsResponse, Error> {
         try parameters.validate()
-        return provider.makeChatCompletionsCallStream(parameters: parameters)
+        return await provider.makeChatCompletionsCallStream(parameters: parameters)
     }
 
     /// Validates and makes request

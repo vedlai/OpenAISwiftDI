@@ -6,15 +6,15 @@
 //
 
 import SwiftUI
-
-@available(macOS 12.0, *)
-@available(iOS 15.0, *)
+@available(watchOS, unavailable)
+@available(iOS 15.0, macOS 12.0, *)
 /// https://platform.openai.com/docs/api-reference/chat
 public struct ChatCompletionsSampleView: View {
     @State private var request: ChatCompletionRequest = .init()
     @State private var responses: [ChatCompletionsResponse] = []
     @State private var latestMessage: ChatMessage = .init(content: "")
     public init() { }
+   
     public var body: some View {
         VStack {
             ScrollViewReader { proxy in
@@ -41,9 +41,8 @@ public struct ChatCompletionsSampleView: View {
         }
     }
 }
-
-@available(macOS 12.0, *)
-@available(iOS 15.0, *)
+@available(watchOS, unavailable)
+@available(iOS 15.0, macOS 12.0, *)
 struct ChatCompletionsSampleView_Previews: PreviewProvider {
     static var previews: some View {
         ChatCompletionsSampleView()

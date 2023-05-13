@@ -24,13 +24,13 @@ public struct ChatCompletionRequest: Codable, Equatable, Hashable, Sendable {
         case model
         case messages
         case temperature
-        case topP = "top_p"
+        case topP
         case number = "n"
         case stream
         case stop
-        case maxTokens = "max_tokens"
-        case presencePenalty = "presence_penalty"
-        case frequencyPenalty = "frequency_penalty"
+        case maxTokens
+        case presencePenalty
+        case frequencyPenalty
     }
 
     /// https://platform.openai.com/docs/models/model-endpoint-compatibility
@@ -132,7 +132,7 @@ public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable 
     public let role: Role
     public var content: String
     public let name: String?
-
+// excludes id
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.role = try container.decode(ChatMessage.Role.self, forKey: .role)
@@ -145,7 +145,7 @@ public struct ChatMessage: Codable, Equatable, Hashable, Identifiable, Sendable 
         case content
         case name
     }
-
+    // excludes id
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.role, forKey: .role)

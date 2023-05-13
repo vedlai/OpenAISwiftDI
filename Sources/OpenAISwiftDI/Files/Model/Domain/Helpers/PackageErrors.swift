@@ -9,7 +9,7 @@ import Foundation
 /// Unit doesnt change without replacement
 extension UnitInformationStorage: @unchecked Sendable {}
 
-enum PackageErrors: LocalizedError {
+public enum PackageErrors: LocalizedError {
     case imageMustBeValidPng
     case maskMustBeValidPng
     case imageMustHaveTransparentAreas
@@ -31,7 +31,7 @@ enum PackageErrors: LocalizedError {
     case maxLetterCountIs(Int)
     case promptShouldHaveMaximumOf(Int)
     case custom(String)
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .promptShouldNotBeEmpty:
             return "mustProvideAPrompt".localize()

@@ -6,6 +6,7 @@
 //
 #if canImport(UIKit)
 import SwiftUI
+@available(watchOS 8.0, *)
 @available(iOS 15.0, *)
 public struct MaskEditParentView: View {
     public static func sample (size: ImageSize) -> UIImage {
@@ -15,6 +16,7 @@ public struct MaskEditParentView: View {
         }
         .frame(width: size.size, height: size.size)
             .snapshot()
+
     }
     @State private var image: UIImage = Self.sample(size: .large)
     @State private var mask: UIImage?
@@ -22,6 +24,7 @@ public struct MaskEditParentView: View {
         MaskEditView(image: image, mask: $mask)
     }
 }
+@available(watchOS 8.0, *)
 @available(iOS 15.0, *)
 public struct MaskEditView: View {
     let image: UIImage
@@ -90,7 +93,7 @@ public struct MaskEditView: View {
         }
     }
 }
-
+@available(watchOS 8.0, *)
 @available(iOS 15.0, *)
 struct MaskEditView_Previews: PreviewProvider {
     static var previews: some View {

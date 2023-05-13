@@ -7,7 +7,8 @@
 
 import Foundation
 extension MockOpenAIProvider {
-    func makeCompletionsCallStream(parameters: CompletionsRequest) -> AsyncThrowingStream<CompletionsResponse, Error> {
+    public func makeCompletionsCallStream(parameters: CompletionsRequest) ->
+    AsyncThrowingStream<CompletionsResponse, Error> {
         .init { continuation in
             let task = Task.detached {
                 let text = ["This", " is", " a", " mock", " stream."]
@@ -35,7 +36,7 @@ extension MockOpenAIProvider {
 
     }
 
-    func makeCompletionsCall(parameters: CompletionsRequest) async throws -> CompletionsResponse {
+    public func makeCompletionsCall(parameters: CompletionsRequest) async throws -> CompletionsResponse {
         return .init(id: UUID().uuidString,
                      object: "Mock object",
                      created: Date(),

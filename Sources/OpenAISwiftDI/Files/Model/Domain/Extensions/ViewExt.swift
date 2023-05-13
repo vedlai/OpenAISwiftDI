@@ -18,6 +18,7 @@ extension View {
         view?.backgroundColor = .clear
 
         let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+
         return renderer.image { _ in
             view?.drawHierarchy(in: .init(origin: .zero, size: targetSize), afterScreenUpdates: true)
         }

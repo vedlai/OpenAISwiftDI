@@ -34,7 +34,7 @@ public struct ImageCreateRequestModel: Codable, Sendable {
             throw PackageErrors.promptShouldHaveMaximumOf(1000)
         }
 
-        let nRange = 0.0...10.0
+        let nRange = 1.0...10.0
         guard (nRange).contains(Double(number)) else {
             throw PackageErrors.number(nRange)
         }
@@ -43,7 +43,7 @@ public struct ImageCreateRequestModel: Codable, Sendable {
         case prompt
         case number = "n"
         case size
-        case responseFormat = "response_format"
+        case responseFormat
         case user
     }
 }

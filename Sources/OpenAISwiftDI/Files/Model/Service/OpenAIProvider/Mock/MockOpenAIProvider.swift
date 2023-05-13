@@ -7,30 +7,40 @@
 
 import Foundation
 /// Mock Provider that returns basic examples with minimal processing. Useful for `Previews`.
-struct MockOpenAIProvider: OpenAIProviderProtocol {
-    func makeChatCompletionsCall2(parameters: ChatCompletionRequest) throws ->
-    AsyncThrowingStream<DecodedResponse<ChatCompletionsResponse>, Error> {
-        fatalError()
-    }
+public actor MockOpenAIProvider: OpenAIProviderProtocol {
+    var decoder: JSONDecoder
 
-    func makeChatCompletionsCallStream2(parameters: ChatCompletionRequest) ->
-    AsyncThrowingStream<DecodedResponse<ChatCompletionsResponse>, Error> {
-        fatalError()
+    var encoder: JSONEncoder
+
+    var fail: Bool
+
+    init() {
+        self.decoder = .init()
+        self.encoder = .init()
+        self.fail = false
+
     }
-    var fail: Bool = false
     //
-    func checkModeration(input: String, model: ModerationModels) async throws -> ModerationResponseModel {
-
+    public func checkModeration(input: String, model: ModerationModels) async throws -> ModerationResponseModel {
+        let flagged = input.lowercased().contains("violence") ||
+        input.lowercased().contains("sexual")
         return .init(id: UUID().uuidString,
                      model: UUID().uuidString,
-                     results: [.init(flagged: input.lowercased().contains("violence"),
-                                     categories: .init(sexual: false,
-                                                       hate: false,
-                                                       violence: true,
-                                                       selfHarm: false,
-                                                       sexualMinors: false,
-                                                       hateThreatening: false,
-                                                       violenceGraphic: false),
+                     results: [.init(flagged: flagged,
+                                     categories: .init(sexual: input.lowercased()
+                                        .contains("sexual"),
+                                                       hate: input.lowercased()
+                                        .contains("hate"),
+                                                       violence: input.lowercased()
+                                        .contains("violence"),
+                                                       selfHarm: input.lowercased()
+                                        .contains("self-harm"),
+                                                       sexualMinors: input.lowercased()
+                                        .contains("sexual minor"),
+                                                       hateThreatening: input.lowercased()
+                                        .contains("hate/threatening"),
+                                                       violenceGraphic: input.lowercased()
+                                        .contains("violence/graphic")),
                                      categoryScores: .init(sexual: 0,
                                                            hate: 0,
                                                            violence: 0,

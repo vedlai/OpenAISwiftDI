@@ -38,7 +38,7 @@ public struct ImageVariationRequestModel: Sendable {
         guard ratio == 1 else {
             throw PackageErrors.imageMustBeSquare
         }
-        let numberRange = 0.0...10.0
+        let numberRange = 1.0...10.0
         guard (numberRange).contains(Double(number)) else {
             throw PackageErrors.number(numberRange)
         }
@@ -47,7 +47,7 @@ public struct ImageVariationRequestModel: Sendable {
         case image
         case number = "n"
         case size
-        case responseFormat = "response_format"
+        case responseFormat
     }
 }
 #endif

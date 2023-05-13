@@ -7,7 +7,7 @@
 
 import Foundation
 extension MockOpenAIProvider {
-    func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse {
+    public func makeChatCompletionsCall(parameters: ChatCompletionRequest) async throws -> ChatCompletionsResponse {
 
         ChatCompletionsResponse(id: UUID().uuidString,
                                 object: "",
@@ -25,7 +25,7 @@ the last one being \"\(parameters.messages.last?.content ?? "Empty content")\".
                                                 finishReason: "stop")])
     }
 
-    func makeChatCompletionsCallStream(parameters: ChatCompletionRequest)
+    public func makeChatCompletionsCallStream(parameters: ChatCompletionRequest)
     -> AsyncThrowingStream<ChatCompletionsResponse, Error> {
         .init { continuation in
             let task = Task.detached {

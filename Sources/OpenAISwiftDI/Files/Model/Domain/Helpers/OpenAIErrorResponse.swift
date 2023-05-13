@@ -7,27 +7,30 @@
 
 import Foundation
 // MARK: - OpenAIErrorResponse
-struct OpenAIErrorResponse: Codable, Sendable {
+public struct OpenAIErrorResponse: Codable, Sendable {
     let error: OpenAIError
 }
 
-// MARK: - Error
-struct OpenAIError: Codable, LocalizedError, Sendable {
+// MARK: - OpenAIError
+public struct OpenAIError: Codable, LocalizedError, Sendable {
     let message, type: String
     let param, code: String?
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         var errorMessage = ""
 
+        errorMessage.append("Type: \(type)")
+
         if let errorCode = code {
-            errorMessage.append("Code: \(errorCode)\n")
+            errorMessage.append("\nCode: \(errorCode)")
         }
-        errorMessage.append("Type: \(type)\n")
-        errorMessage.append("Message: \(message)\n")
 
         if let errorParam = param {
-            errorMessage.append("Param: \(errorParam)")
+            errorMessage.append("\nParam: \(errorParam)")
         }
+
+        errorMessage.append("\nMessage: \(message)")
+
         return errorMessage
     }
 }

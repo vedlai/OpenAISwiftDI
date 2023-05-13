@@ -13,7 +13,7 @@ struct CatchingButton<Label>: View where Label: View {
     let label: Label
     let action: () async throws -> Void
     @State private var isProcessing: Bool = false
-    @State private var showingAlert: (Bool, LocalError?) = (false, nil)
+    @State private var showingAlert: (isPresented: Bool, error: LocalError?) = (false, nil)
 
     init(@ViewBuilder label: () -> Label, action: @escaping () async throws -> Void) {
         self.label = label()
@@ -46,7 +46,7 @@ struct CatchingButton<Label>: View where Label: View {
                             }
                     }
                 }
-        }.alert(isPresented: $showingAlert.0, error: showingAlert.1) {
+        }.alert(isPresented: $showingAlert.isPresented, error: showingAlert.error) {
             SwiftUI.Button(.getString(.okay)) {
                 showingAlert = (false, nil)
             }

@@ -21,7 +21,7 @@ public struct ImageEditRequestModel: Sendable {
         case prompt
         case number = "n"
         case size
-        case responseFormat = "response_format"
+        case responseFormat
         case user
         case mask
         case image
@@ -99,7 +99,7 @@ public struct ImageEditRequestUniModel: Sendable {
         case prompt
         case number = "n"
         case size
-        case responseFormat = "response_format"
+        case responseFormat
         case user
         case mask
         case image
@@ -119,21 +119,34 @@ public struct ImageEditRequestUniModel: Sendable {
         let maxBytes = maxMB.converted(to: .bytes).value
         if let mask = mask {
 
-            guard  Double(mask.count) < maxBytes else {
+            guard  Double(mask.count) < maxBytes && mask.count > 10 else {
                 throw PackageErrors.maskSizeShouldNotExceed(maxMB)
             }
         }
 
-        guard  Double(image.count) < maxBytes else {
+        guard Double(image.count) < maxBytes else {
             throw PackageErrors.imageSizeShouldNotExceed(maxMB)
         }
         let promptMax = 1000
         guard prompt.count <= promptMax else {
             throw PackageErrors.promptShouldHaveMaximumOf(promptMax)
         }
-        let nRange = 0.0...10.0
+        let nRange = 1.0...10.0
         guard (nRange).contains(Double(number)) else {
             throw PackageErrors.number(nRange)
         }
     }
+    #if canImport(UIKit)
+    func toIOSVersion() -> ImageEditRequestModel? {
+        guard let image = UIImage(data: image) else {
+            return nil
+        }
+        return ImageEditRequestModel(image: image,
+                                     mask: UIImage(data: mask ?? .init()),
+                                     prompt: prompt,
+                                     number: number,
+                                     size: size,
+                                     user: user)
+    }
+    #endif
 }

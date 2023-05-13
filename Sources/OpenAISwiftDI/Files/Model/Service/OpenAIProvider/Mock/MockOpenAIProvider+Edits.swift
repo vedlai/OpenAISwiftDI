@@ -7,7 +7,7 @@
 
 import Foundation
 extension MockOpenAIProvider {
-    func makeEditCall(parameters: EditRequest) async throws -> EditResponse {
+    public func makeEditCall(parameters: EditRequest) async throws -> EditResponse {
         .init(object: "mock",
               created: Date(),
               choices: [.init(text: "Edited: \"\(parameters.input ?? "")\" by adding \"\(parameters.instruction)\"",

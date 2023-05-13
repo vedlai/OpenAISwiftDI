@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+@available(watchOS 8.0, *)
 @available(macOS 12.0, *)
 @available(iOS 15.0, *)
 public struct EditsSampleView: View {
@@ -42,6 +43,7 @@ public struct EditsSampleView: View {
         }
     }
 }
+@available(watchOS 8.0, *)
 @available(macOS 12.0, *)
 @available(iOS 15.0, *)
 struct EditsSampleView_Previews: PreviewProvider {

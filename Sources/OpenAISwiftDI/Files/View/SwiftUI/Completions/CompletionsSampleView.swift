@@ -6,13 +6,16 @@
 //
 
 import SwiftUI
-@available(macOS 12.0, *)
-@available(iOS 15.0, *)
+
+@available(watchOS, unavailable)
+@available(iOS 15.0, macOS 12.0, *)
 /// https://platform.openai.com/docs/api-reference/completions
 public struct CompletionsSampleView: View {
     @State private var request: CompletionsRequest = .init(prompt: "")
     @State private var response: CompletionsResponse?
     public init() { }
+    
+    
     public var body: some View {
         List {
             Section(.getString(.request)) {
@@ -34,8 +37,8 @@ public struct CompletionsSampleView: View {
             .buttonStyle(.borderedProminent)
     }
 }
-@available(macOS 12.0, *)
-@available(iOS 15.0, *)
+@available(watchOS, unavailable)
+@available(iOS 15.0, macOS 12.0, *)
 struct CompletionsSampleView_Previews: PreviewProvider {
     static var previews: some View {
         CompletionsSampleView()

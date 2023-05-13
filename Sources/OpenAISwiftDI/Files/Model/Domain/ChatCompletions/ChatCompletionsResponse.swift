@@ -76,12 +76,6 @@ public struct ChatChoice: Codable, Equatable, Hashable, Identifiable, Sendable {
             return temp
         }
     }
-    enum CodingKeys: String, CodingKey {
-        case index
-        case delta
-        case message
-        case finishReason = "finish_reason"
-    }
 }
 
 extension Array where Element == ChatCompletionsResponse {
