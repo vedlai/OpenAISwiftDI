@@ -98,6 +98,8 @@ More to come...
 
 Contributions for improvements are welcomed. Feel free to submit a pull request to help grow the library. If you have any questions, or bug reports, please send them to [Issues](https://github.com/vedlai/OpenAISwiftDI/issues).
 
+I can grow the library some more, let me know what you want to see.
+
 # Known Limitations
 
 1. Image endpoints are limited to iOS and Mac Catalyst because of `UIImage`. 
